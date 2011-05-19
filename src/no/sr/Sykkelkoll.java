@@ -29,7 +29,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -39,17 +38,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -66,7 +62,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.SlidingDrawer;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -109,8 +105,16 @@ public class Sykkelkoll extends MapActivity {
 			return true;
 
 		case 2:
-			mapView.getController().animateTo(myLocOverlay.getMyLocation());
-			mapView.getController().setZoom(16);
+			if (myLocOverlay.getMyLocation() != null) {
+				mapView.getController().animateTo(myLocOverlay.getMyLocation());
+				mapView.getController().setZoom(16);
+			} else {
+				CharSequence text = "Kan ikke fastslå position";
+				int duration = Toast.LENGTH_SHORT;
+
+				Toast toast = Toast.makeText(this, text, duration);
+				toast.show();
+			}
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -133,8 +137,9 @@ public class Sykkelkoll extends MapActivity {
 		case NO_INTERNET_ACCESS_DIALOG:
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(
-					"Internett-tilkobling trengs for at bruke applik asjonen")
-					.setCancelable(false).setNeutralButton("OK",
+					"Internett-tilkobling trengs for at bruke applikasjonen")
+					.setCancelable(false)
+					.setNeutralButton("OK",
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int id) {
@@ -176,9 +181,7 @@ public class Sykkelkoll extends MapActivity {
 		if (!isInternetEnabled()) {
 			showDialog(NO_INTERNET_ACCESS_DIALOG);
 		} else {
-			Thread
-					.setDefaultUncaughtExceptionHandler(new ExceptionHandler(
-							this));
+			Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
 			String stackTrace = getStoredStackTrace();
 			if (stackTrace != null) {
 				Log.i(getClass().getSimpleName() + "-" + "mailStackTrace",
@@ -192,8 +195,7 @@ public class Sykkelkoll extends MapActivity {
 					+ stopWatch.getElapsedTime());
 
 			mapView = (MapView) findViewById(R.id.mapview);
-			
-						
+
 			// Init DB
 			stationsHelper = new StationsOpenHelper(this);
 			try {
@@ -210,7 +212,7 @@ public class Sykkelkoll extends MapActivity {
 				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
 						e);
 			}
-			
+
 			new RenderTask().execute();
 			prepareOverlays();
 			initMapView();
@@ -224,9 +226,7 @@ public class Sykkelkoll extends MapActivity {
 					Log.d(getClass().getSimpleName() + "-" + LOG_TAG_BUTTON,
 							"Click toggle button");
 					if (renderReadyBikes == false) {
-						Log.d(
-								getClass().getSimpleName() + "-"
-										+ LOG_TAG_BUTTON,
+						Log.d(getClass().getSimpleName() + "-" + LOG_TAG_BUTTON,
 								"Toggle button show bikes");
 						renderReadyBikes = true;
 						((Button) v).setText("Vis lås");
@@ -234,9 +234,7 @@ public class Sykkelkoll extends MapActivity {
 						renderPins();
 						dismissDialog(LOADING_STATIONS_DIALOG);
 					} else if (renderReadyBikes == true) {
-						Log.d(
-								getClass().getSimpleName() + "-"
-										+ LOG_TAG_BUTTON,
+						Log.d(getClass().getSimpleName() + "-" + LOG_TAG_BUTTON,
 								"Toggle button show slots");
 						renderReadyBikes = false;
 						((Button) v).setText("Vis sykkler");
@@ -246,7 +244,6 @@ public class Sykkelkoll extends MapActivity {
 					}
 				}
 			});
-
 
 		}
 	}
@@ -275,8 +272,8 @@ public class Sykkelkoll extends MapActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			updateStations();
-			
-			while(bikeOverlay.size() != freeBikesArray.length) {
+
+			while (bikeOverlay.size() != freeBikesArray.length) {
 				try {
 					Thread.sleep(50);
 				} catch (InterruptedException e) {
@@ -340,8 +337,7 @@ public class Sykkelkoll extends MapActivity {
 					copyDataBase();
 
 				} catch (IOException e) {
-					Log.e("Sykkelkoll-" + "IO", e.getMessage(),
-							e);
+					Log.e("Sykkelkoll-" + "IO", e.getMessage(), e);
 				}
 			} else {
 				Log.e("Sykkelkoll-" + "IO", "else");
@@ -457,8 +453,8 @@ public class Sykkelkoll extends MapActivity {
 		} catch (FileNotFoundException fnfe) {
 			return null;
 		} catch (IOException ioe) {
-			Log.e(getClass().getSimpleName() + "-" + "mailStackTrace", ioe
-					.getMessage(), ioe);
+			Log.e(getClass().getSimpleName() + "-" + "mailStackTrace",
+					ioe.getMessage(), ioe);
 		}
 		return storedStackTrace.toString();
 	}
@@ -488,8 +484,8 @@ public class Sykkelkoll extends MapActivity {
 						"Download " + stopWatch.getElapsedTime());
 				stopWatch.start();
 
-				String content = streamToString(
-						httpResponse.getEntity().getContent());
+				String content = streamToString(httpResponse.getEntity()
+						.getContent());
 				freeBikesArray = content.split(",");
 			} catch (URISyntaxException e) {
 				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
@@ -536,12 +532,12 @@ public class Sykkelkoll extends MapActivity {
 				"Init my location " + stopWatch.getElapsedTime());
 
 	}
-	
+
 	public void prepareOverlays() {
 		stopWatch.start();
 		Drawable drawable = this.getResources().getDrawable(R.drawable.m0);
-		drawable.setBounds(-drawable.getIntrinsicWidth(), -drawable
-				.getIntrinsicHeight(), 0, 0);
+		drawable.setBounds(-drawable.getIntrinsicWidth(),
+				-drawable.getIntrinsicHeight(), 0, 0);
 
 		bikeOverlay = new BikeOverlay(drawable, this);
 
@@ -555,37 +551,36 @@ public class Sykkelkoll extends MapActivity {
 		int descriptionColumnIndex = c.getColumnIndex("description");
 		int idColumnIndex = c.getColumnIndex("_id");
 		int freeBikesColumnIndex = c.getColumnIndex("totalBikes");
-        while (c.isAfterLast() == false && count != 10) {
-        	
-        	GeoPoint point;
+		while (c.isAfterLast() == false && count != 10) {
+
+			GeoPoint point;
 			point = new GeoPoint(c.getInt(latitudeColumnIndex),
 					c.getInt(longitudeColumnIndex));
-			
-			BikeOverlayItem overlayitem = new BikeOverlayItem(point, c.getString(descriptionColumnIndex), "");
+
+			BikeOverlayItem overlayitem = new BikeOverlayItem(point,
+					c.getString(descriptionColumnIndex), "");
 			overlayitem.setId(c.getInt(idColumnIndex));
 			overlayitem.setMaxBikes(c.getInt(freeBikesColumnIndex));
 			overlayitem.setBikeMarker(graphicsProvider.getPinDrawable(0));
 			bikeOverlay.addOverlay(overlayitem);
 
-			
 			c.moveToNext();
 		}
 		stopWatch.stop();
 		Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Prepare "
 				+ stopWatch.getElapsedTime());
-		
-		
-	} 
+
+	}
 
 	public void render() {
 		stopWatch.start();
 		List<Overlay> mapOverlays = mapView.getOverlays();
 		mapOverlays.remove(bikeOverlay);
-		
+
 		int i;
-		for(i=0; i < bikeOverlay.size(); i++) {
+		for (i = 0; i < bikeOverlay.size(); i++) {
 			BikeOverlayItem bikeItem = bikeOverlay.getItem(i);
-			
+
 			int number;
 			int freeBikes = Integer.parseInt(freeBikesArray[bikeItem.getId()]);
 			if (freeBikes < 0) {
@@ -597,29 +592,27 @@ public class Sykkelkoll extends MapActivity {
 					number = bikeItem.getMaxBikes() - freeBikes;
 				}
 			}
-			
-			
-			Drawable bikePin = graphicsProvider.getPinDrawable(number);
-			bikePin.setBounds(-bikePin.getIntrinsicWidth(), -bikePin
-					.getIntrinsicHeight(), 0, 0);
 
-			
+			Drawable bikePin = graphicsProvider.getPinDrawable(number);
+			bikePin.setBounds(-bikePin.getIntrinsicWidth(),
+					-bikePin.getIntrinsicHeight(), 0, 0);
+
 			bikeItem.setBikeMarker(bikePin);
-			
+
 		}
 		mapOverlays.add(bikeOverlay);
 		mapView.getController().animateTo(mapView.getMapCenter());
 		stopWatch.stop();
 		Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Render "
 				+ stopWatch.getElapsedTime());
-		
+
 	}
-	
+
 	public void renderPins() {
 		stopWatch.start();
 		Drawable drawable = this.getResources().getDrawable(R.drawable.m0);
-		drawable.setBounds(-drawable.getIntrinsicWidth(), -drawable
-				.getIntrinsicHeight(), 0, 0);
+		drawable.setBounds(-drawable.getIntrinsicWidth(),
+				-drawable.getIntrinsicHeight(), 0, 0);
 
 		List<Overlay> mapOverlays = mapView.getOverlays();
 		mapOverlays.remove(bikeOverlay);
@@ -635,14 +628,16 @@ public class Sykkelkoll extends MapActivity {
 		int descriptionColumnIndex = c.getColumnIndex("description");
 		int idColumnIndex = c.getInt(c.getColumnIndex("_id"));
 		int freeBikesColumnIndex = c.getColumnIndex("totalBikes");
-        while (c.isAfterLast() == false && count != 10) {
-        	
-        	GeoPoint point;
+		while (c.isAfterLast() == false && count != 10) {
+
+			GeoPoint point;
 			point = new GeoPoint(c.getInt(latitudeColumnIndex),
 					c.getInt(longitudeColumnIndex));
-			
-			BikeOverlayItem overlayitem = new BikeOverlayItem(point, c.getString(descriptionColumnIndex), "");
-			int freeBikes = Integer.parseInt(freeBikesArray[c.getInt(idColumnIndex)]); 
+
+			BikeOverlayItem overlayitem = new BikeOverlayItem(point,
+					c.getString(descriptionColumnIndex), "");
+			int freeBikes = Integer.parseInt(freeBikesArray[c
+					.getInt(idColumnIndex)]);
 			int number;
 			if (freeBikes < 0) {
 				number = 0;
@@ -653,15 +648,14 @@ public class Sykkelkoll extends MapActivity {
 					number = c.getInt(freeBikesColumnIndex) - freeBikes;
 				}
 			}
-			
+
 			Drawable bikePin = graphicsProvider.getPinDrawable(number);
-			bikePin.setBounds(-bikePin.getIntrinsicWidth(), -bikePin
-					.getIntrinsicHeight(), 0, 0);
+			bikePin.setBounds(-bikePin.getIntrinsicWidth(),
+					-bikePin.getIntrinsicHeight(), 0, 0);
 
 			overlayitem.setBikeMarker(bikePin);
 			bikeOverlay.addOverlay(overlayitem);
 
-			
 			c.moveToNext();
 		}
 		stopWatch.stop();
