@@ -27,8 +27,7 @@ public class BikeOverlayItem extends OverlayItem {
 	private Drawable bikeMarker;
 	private Drawable placeMarker;
 	private int id;
-	private int maxBikes;
-
+	
 	public Drawable getBikeMarker() {
 		return bikeMarker;
 	}
@@ -45,8 +44,10 @@ public class BikeOverlayItem extends OverlayItem {
 		this.placeMarker = placeMarker;
 	}
 
-	public BikeOverlayItem(final GeoPoint point, final String title, final String snippet) {
-		super(point, title, snippet);
+	public BikeOverlayItem(Station station) {
+		super(station.getLocation(), station.getDescription(), null);
+		id = station.getId();
+		
 	}
 
 	@Override
@@ -62,11 +63,4 @@ public class BikeOverlayItem extends OverlayItem {
 		return id;
 	}
 
-	public void setMaxBikes(int maxBikes) {
-		this.maxBikes = maxBikes;
-	}
-
-	public int getMaxBikes() {
-		return maxBikes;
-	}
 }

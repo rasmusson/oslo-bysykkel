@@ -30,7 +30,14 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -38,10 +45,17 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -85,9 +99,8 @@ public class Sykkelkoll extends MapActivity {
 	private MyLocationOverlay myLocOverlay;
 	private final Timer stopWatch = new Timer();
 	private StationsOpenHelper stationsHelper;
-
-	private String[] freeBikesArray;
-
+	private Map<Integer, Station> globalStationsMap;
+	
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -271,16 +284,8 @@ public class Sykkelkoll extends MapActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			updateStations();
-
-			while (bikeOverlay.size() != freeBikesArray.length) {
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			globalStationsMap = getStationsFromDataBase();
+			
 			render();
 			return null;
 		}
@@ -322,6 +327,16 @@ public class Sykkelkoll extends MapActivity {
 
 		public Cursor getStations() {
 			return stationsDB.rawQuery("select * from station;", null);
+		}
+		
+		public void addStation(Station newStation) {
+			ContentValues params = new ContentValues();
+
+			params.put("latitude", newStation.getLocation().getLatitudeE6());
+			params.put("longitude", newStation.getLocation().getLongitudeE6());
+			params.put("description", newStation.getDescription());
+			params.put("_id", newStation.getId());
+			stationsDB.insert("station", null, params);
 		}
 
 		public void createDataBase() throws IOException {
@@ -459,46 +474,20 @@ public class Sykkelkoll extends MapActivity {
 		return storedStackTrace.toString();
 	}
 
-	public void updateStations() {
-		stopWatch.start();
-
-		HttpGet httpGet = new HttpGet();
-		HttpClient httpClient = new DefaultHttpClient();
-		httpClient.getParams().setIntParameter(
-				CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
-		httpClient.getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT,
-				10000);
-
-		URI uri = null;
-
-		freeBikesArray = null;
-		while (freeBikesArray == null) {
-			try {
-				uri = new URI("http://bysykel.appspot.com/csv");
-				httpGet.setURI(uri);
-
-				HttpResponse httpResponse = httpClient.execute(httpGet);
-
-				stopWatch.stop();
-				Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
-						"Download " + stopWatch.getElapsedTime());
-				stopWatch.start();
-
-				String content = streamToString(httpResponse.getEntity()
-						.getContent());
-				freeBikesArray = content.split(",");
-			} catch (URISyntaxException e) {
-				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
-						e);
-			} catch (ClientProtocolException e) {
-				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
-						e);
-			} catch (IOException e) {
-				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
-						e);
-			}
+	private List<StationSmall> toStationSmallList(InputStream content) throws JSONException, IOException {
+		List<StationSmall> stationSmallList = new ArrayList<StationSmall>();
+		JSONArray jsonStationsArray = new JSONArray(streamToString(content));
+		for (int i = 0; i < jsonStationsArray.length(); i++) {
+			JSONObject jsonStation = jsonStationsArray.getJSONObject(i);
+			StationSmall stationSmall = new StationSmall();
+			stationSmall.setId(jsonStation.getInt("id"));
+			stationSmall.setBikesReady(jsonStation.getInt("bikesReady"));
+			stationSmall.setEmptyLocks(jsonStation.getInt("emptyLocks"));
+			stationSmall.setOnline(jsonStation.getBoolean("online"));
+			stationSmallList.add(stationSmall);
 		}
-
+		
+		return stationSmallList;	
 	}
 
 	private String streamToString(InputStream is) throws IOException {
@@ -532,7 +521,137 @@ public class Sykkelkoll extends MapActivity {
 				"Init my location " + stopWatch.getElapsedTime());
 
 	}
+	
+	public void populateStationsWithBackendData(Map<Integer, Station> stationsMap) {
+		stopWatch.start();
 
+		HttpGet httpGet = new HttpGet();
+		HttpClient httpClient = new DefaultHttpClient();
+		httpClient.getParams().setIntParameter(
+				CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
+		httpClient.getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT,
+				10000);
+
+		URI uri = null;
+
+		try {
+				uri = new URI("http://bysykel.appspot.com/json");
+				httpGet.setURI(uri);
+
+				HttpResponse httpResponse = httpClient.execute(httpGet);
+
+				stopWatch.stop();
+				Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
+						"Download " + stopWatch.getElapsedTime());
+				stopWatch.start();
+				
+				List<StationSmall> stationSmallList = null;
+				try {
+					stationSmallList = toStationSmallList(httpResponse.getEntity().getContent());
+				} catch (IllegalStateException e) {
+					Log.e("Error", e.getMessage());
+					e.printStackTrace();
+				} catch (JSONException e) {
+					Log.e("Error", e.getMessage());
+					e.printStackTrace();
+				}
+				
+				stopWatch.stop();
+				Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
+						"Parsing " + stopWatch.getElapsedTime());
+				
+				for (StationSmall stationSmall : stationSmallList) {
+					if (stationsMap.containsKey(stationSmall.getId())) {
+						stationsMap.get(stationSmall.getId()).populateFromStationSmall(stationSmall);
+					} else {
+						Station newStation = downloadNewStationInfo(stationSmall.getId(), httpClient);
+						stationsHelper.addStation(newStation);
+						newStation.populateFromStationSmall(stationSmall);
+						stationsMap.put(newStation.getId(), newStation);
+					}					
+				}
+			} catch (URISyntaxException e) {
+				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
+						e);
+			} catch (ClientProtocolException e) {
+				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
+						e);
+			} catch (IOException e) {
+				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
+						e);
+			}
+	}
+
+	private Station downloadNewStationInfo(Integer id, HttpClient httpClient) {
+		String url = "http://smartbikeportal.clearchannel.no/public/mobapp/maq.asmx/getRack?id=" + id;
+		
+		HttpGet httpGet = new HttpGet();
+		Station station = null;
+		try {
+			httpGet.setURI(new URI(url));
+			HttpResponse httpResponse = httpClient.execute(httpGet);
+			station = parseXMLStation(httpResponse.getEntity().getContent());
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return station;
+		
+	}
+
+	private Station parseXMLStation(InputStream content) {
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		XMLStationHandler xmlStationHandler = null;
+		try {
+			SAXParser sp = spf.newSAXParser();
+			XMLReader xr = sp.getXMLReader();
+			xmlStationHandler = new XMLStationHandler();
+			xr.setContentHandler(xmlStationHandler);
+			xr.parse(new InputSource(content));
+				
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 	xmlStationHandler.getData();
+		
+	}
+
+	public Map<Integer, Station> getStationsFromDataBase() {
+		
+		Map<Integer, Station> stationsMap = new HashMap<Integer, Station>();
+		Cursor c = stationsHelper.getStations();
+		c.moveToFirst();
+		int count = 0;
+		int latitudeColumnIndex = c.getColumnIndex("latitude");
+		int longitudeColumnIndex = c.getColumnIndex("longitude");
+		int descriptionColumnIndex = c.getColumnIndex("description");
+		int idColumnIndex = c.getColumnIndex("_id");
+		while (c.isAfterLast() == false && count != 10) {
+
+			Station station = new Station();
+			station.setLocation(new GeoPoint(c.getInt(latitudeColumnIndex),
+					c.getInt(longitudeColumnIndex)));
+
+			station.setDescription(c.getString(descriptionColumnIndex));
+			station.setId(c.getInt(idColumnIndex));
+			stationsMap.put(station.getId(), station);
+		}
+		return stationsMap;
+	}
+	
 	public void prepareOverlays() {
 		stopWatch.start();
 		Drawable drawable = this.getResources().getDrawable(R.drawable.m0);
@@ -550,17 +669,17 @@ public class Sykkelkoll extends MapActivity {
 		int longitudeColumnIndex = c.getColumnIndex("longitude");
 		int descriptionColumnIndex = c.getColumnIndex("description");
 		int idColumnIndex = c.getColumnIndex("_id");
-		int freeBikesColumnIndex = c.getColumnIndex("totalBikes");
 		while (c.isAfterLast() == false && count != 10) {
 
-			GeoPoint point;
-			point = new GeoPoint(c.getInt(latitudeColumnIndex),
-					c.getInt(longitudeColumnIndex));
+			Station station = new Station();
+			station.setLocation(new GeoPoint(c.getInt(latitudeColumnIndex),
+					c.getInt(longitudeColumnIndex)));
 
-			BikeOverlayItem overlayitem = new BikeOverlayItem(point,
-					c.getString(descriptionColumnIndex), "");
-			overlayitem.setId(c.getInt(idColumnIndex));
-			overlayitem.setMaxBikes(c.getInt(freeBikesColumnIndex));
+			station.setDescription(c.getString(descriptionColumnIndex));
+			station.setId(c.getInt(idColumnIndex));
+			
+			
+			BikeOverlayItem overlayitem = new BikeOverlayItem(stat)
 			overlayitem.setBikeMarker(graphicsProvider.getPinDrawable(0));
 			bikeOverlay.addOverlay(overlayitem);
 
@@ -582,7 +701,7 @@ public class Sykkelkoll extends MapActivity {
 			BikeOverlayItem bikeItem = bikeOverlay.getItem(i);
 
 			int number;
-			int freeBikes = Integer.parseInt(freeBikesArray[bikeItem.getId()]);
+			
 			if (freeBikes < 0) {
 				number = 0;
 			} else {
