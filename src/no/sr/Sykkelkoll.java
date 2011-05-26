@@ -122,7 +122,7 @@ public class Sykkelkoll extends MapActivity {
 				mapView.getController().animateTo(myLocOverlay.getMyLocation());
 				mapView.getController().setZoom(16);
 			} else {
-				CharSequence text = "Kan ikke fastslå position";
+				CharSequence text = "Kan ikke fastslï¿½ position";
 				int duration = Toast.LENGTH_SHORT;
 
 				Toast toast = Toast.makeText(this, text, duration);
@@ -227,11 +227,11 @@ public class Sykkelkoll extends MapActivity {
 			}
 
 			new RenderTask().execute();
-			prepareOverlays();
+			createOverlays();
 			initMapView();
 			initMyLocation();
 			Button toggleButton = (Button) findViewById(R.id.toggleButton);
-			toggleButton.setText("Vis lås");
+			toggleButton.setText("Vis lï¿½s");
 			toggleButton.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -242,9 +242,9 @@ public class Sykkelkoll extends MapActivity {
 						Log.d(getClass().getSimpleName() + "-" + LOG_TAG_BUTTON,
 								"Toggle button show bikes");
 						renderReadyBikes = true;
-						((Button) v).setText("Vis lås");
+						((Button) v).setText("Vis lï¿½s");
 						showDialog(LOADING_STATIONS_DIALOG);
-						renderPins();
+						render();
 						dismissDialog(LOADING_STATIONS_DIALOG);
 					} else if (renderReadyBikes == true) {
 						Log.d(getClass().getSimpleName() + "-" + LOG_TAG_BUTTON,
@@ -252,7 +252,7 @@ public class Sykkelkoll extends MapActivity {
 						renderReadyBikes = false;
 						((Button) v).setText("Vis sykkler");
 						showDialog(LOADING_STATIONS_DIALOG);
-						renderPins();
+						render();
 						dismissDialog(LOADING_STATIONS_DIALOG);
 					}
 				}
@@ -285,9 +285,17 @@ public class Sykkelkoll extends MapActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			globalStationsMap = getStationsFromDataBase();
-			
+			populateStationsWithBackendData(globalStationsMap);
+			updateOverlays();
 			render();
 			return null;
+		}
+
+		private void updateOverlays() {
+			for (int i = 0; i < bikeOverlay.size(); i++) {
+				BikeOverlayItem overlayItem = bikeOverlay.getItem(i);
+				overlayItem.setStation(globalStationsMap.get(overlayItem.getStation()));				
+			}
 		}
 	}
 
@@ -652,7 +660,7 @@ public class Sykkelkoll extends MapActivity {
 		return stationsMap;
 	}
 	
-	public void prepareOverlays() {
+	public void createOverlays() {
 		stopWatch.start();
 		Drawable drawable = this.getResources().getDrawable(R.drawable.m0);
 		drawable.setBounds(-drawable.getIntrinsicWidth(),
@@ -662,31 +670,13 @@ public class Sykkelkoll extends MapActivity {
 
 		this.mapView.getController().setCenter(this.mapView.getMapCenter());
 
-		Cursor c = stationsHelper.getStations();
-		c.moveToFirst();
-		int count = 0;
-		int latitudeColumnIndex = c.getColumnIndex("latitude");
-		int longitudeColumnIndex = c.getColumnIndex("longitude");
-		int descriptionColumnIndex = c.getColumnIndex("description");
-		int idColumnIndex = c.getColumnIndex("_id");
-		while (c.isAfterLast() == false && count != 10) {
-
-			Station station = new Station();
-			station.setLocation(new GeoPoint(c.getInt(latitudeColumnIndex),
-					c.getInt(longitudeColumnIndex)));
-
-			station.setDescription(c.getString(descriptionColumnIndex));
-			station.setId(c.getInt(idColumnIndex));
-			
-			
-			BikeOverlayItem overlayitem = new BikeOverlayItem(stat)
+		for (Integer stationId : globalStationsMap.keySet()) {			
+			BikeOverlayItem overlayitem = new BikeOverlayItem(globalStationsMap.get(stationId));
 			overlayitem.setBikeMarker(graphicsProvider.getPinDrawable(0));
 			bikeOverlay.addOverlay(overlayitem);
-
-			c.moveToNext();
 		}
 		stopWatch.stop();
-		Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Prepare "
+		Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Create overlays "
 				+ stopWatch.getElapsedTime());
 
 	}
@@ -700,90 +690,25 @@ public class Sykkelkoll extends MapActivity {
 		for (i = 0; i < bikeOverlay.size(); i++) {
 			BikeOverlayItem bikeItem = bikeOverlay.getItem(i);
 
-			int number;
-			
-			if (freeBikes < 0) {
-				number = 0;
-			} else {
-				if (renderReadyBikes) {
-					number = freeBikes;
-				} else {
-					number = bikeItem.getMaxBikes() - freeBikes;
-				}
-			}
-
-			Drawable bikePin = graphicsProvider.getPinDrawable(number);
-			bikePin.setBounds(-bikePin.getIntrinsicWidth(),
-					-bikePin.getIntrinsicHeight(), 0, 0);
-
+			Drawable bikePin;
+		if (renderReadyBikes) {
+			bikePin = graphicsProvider.getPinDrawable(bikeItem.getStation().getBikesReady());
+			bikePin.setBounds(-bikePin.getIntrinsicWidth(),-bikePin.getIntrinsicHeight(), 0, 0);
+		} else {
+			bikePin = graphicsProvider.getPinDrawable(bikeItem.getStation().getLocksReady());
+			bikePin.setBounds(-bikePin.getIntrinsicWidth(),-bikePin.getIntrinsicHeight(), 0, 0);
+		}
+		
 			bikeItem.setBikeMarker(bikePin);
-
 		}
 		mapOverlays.add(bikeOverlay);
+		
 		mapView.getController().animateTo(mapView.getMapCenter());
 		stopWatch.stop();
 		Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Render "
 				+ stopWatch.getElapsedTime());
 
 	}
-
-	public void renderPins() {
-		stopWatch.start();
-		Drawable drawable = this.getResources().getDrawable(R.drawable.m0);
-		drawable.setBounds(-drawable.getIntrinsicWidth(),
-				-drawable.getIntrinsicHeight(), 0, 0);
-
-		List<Overlay> mapOverlays = mapView.getOverlays();
-		mapOverlays.remove(bikeOverlay);
-		bikeOverlay = new BikeOverlay(drawable, this);
-
-		this.mapView.getController().setCenter(this.mapView.getMapCenter());
-
-		Cursor c = stationsHelper.getStations();
-		c.moveToFirst();
-		int count = 0;
-		int latitudeColumnIndex = c.getColumnIndex("latitude");
-		int longitudeColumnIndex = c.getColumnIndex("longitude");
-		int descriptionColumnIndex = c.getColumnIndex("description");
-		int idColumnIndex = c.getInt(c.getColumnIndex("_id"));
-		int freeBikesColumnIndex = c.getColumnIndex("totalBikes");
-		while (c.isAfterLast() == false && count != 10) {
-
-			GeoPoint point;
-			point = new GeoPoint(c.getInt(latitudeColumnIndex),
-					c.getInt(longitudeColumnIndex));
-
-			BikeOverlayItem overlayitem = new BikeOverlayItem(point,
-					c.getString(descriptionColumnIndex), "");
-			int freeBikes = Integer.parseInt(freeBikesArray[c
-					.getInt(idColumnIndex)]);
-			int number;
-			if (freeBikes < 0) {
-				number = 0;
-			} else {
-				if (renderReadyBikes) {
-					number = freeBikes;
-				} else {
-					number = c.getInt(freeBikesColumnIndex) - freeBikes;
-				}
-			}
-
-			Drawable bikePin = graphicsProvider.getPinDrawable(number);
-			bikePin.setBounds(-bikePin.getIntrinsicWidth(),
-					-bikePin.getIntrinsicHeight(), 0, 0);
-
-			overlayitem.setBikeMarker(bikePin);
-			bikeOverlay.addOverlay(overlayitem);
-
-			c.moveToNext();
-		}
-		stopWatch.stop();
-		Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Render "
-				+ stopWatch.getElapsedTime());
-		mapOverlays.add(bikeOverlay);
-		mapView.getController().animateTo(mapView.getMapCenter());
-	}
-
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;

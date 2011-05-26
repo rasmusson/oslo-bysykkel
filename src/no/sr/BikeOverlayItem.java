@@ -26,7 +26,7 @@ public class BikeOverlayItem extends OverlayItem {
 
 	private Drawable bikeMarker;
 	private Drawable placeMarker;
-	private int id;
+	private Station station;
 	
 	public Drawable getBikeMarker() {
 		return bikeMarker;
@@ -46,21 +46,19 @@ public class BikeOverlayItem extends OverlayItem {
 
 	public BikeOverlayItem(Station station) {
 		super(station.getLocation(), station.getDescription(), null);
-		id = station.getId();
-		
+		this.station = station;
 	}
 
 	@Override
 	public Drawable getMarker(final int stateBitset) {
 		return bikeMarker;
 	}
-
-	public void setId(int id) {
-		this.id = id;
+	
+	public Station getStation() {
+		return station;
 	}
-
-	public int getId() {
-		return id;
+	
+	public void setStation(Station station) {
+		this.station = station;
 	}
-
 }
