@@ -227,11 +227,10 @@ public class Sykkelkoll extends MapActivity {
 			}
 
 			new RenderTask().execute();
-			createOverlays();
 			initMapView();
 			initMyLocation();
 			Button toggleButton = (Button) findViewById(R.id.toggleButton);
-			toggleButton.setText("Vis l�s");
+			toggleButton.setText("Vis lås");
 			toggleButton.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -242,7 +241,7 @@ public class Sykkelkoll extends MapActivity {
 						Log.d(getClass().getSimpleName() + "-" + LOG_TAG_BUTTON,
 								"Toggle button show bikes");
 						renderReadyBikes = true;
-						((Button) v).setText("Vis l�s");
+						((Button) v).setText("Vis lås");
 						showDialog(LOADING_STATIONS_DIALOG);
 						render();
 						dismissDialog(LOADING_STATIONS_DIALOG);
@@ -286,6 +285,7 @@ public class Sykkelkoll extends MapActivity {
 		protected Void doInBackground(Void... params) {
 			globalStationsMap = getStationsFromDataBase();
 			populateStationsWithBackendData(globalStationsMap);
+			createOverlays();
 			updateOverlays();
 			render();
 			return null;
@@ -294,7 +294,7 @@ public class Sykkelkoll extends MapActivity {
 		private void updateOverlays() {
 			for (int i = 0; i < bikeOverlay.size(); i++) {
 				BikeOverlayItem overlayItem = bikeOverlay.getItem(i);
-				overlayItem.setStation(globalStationsMap.get(overlayItem.getStation()));				
+				overlayItem.setStation(globalStationsMap.get(overlayItem.getStation().getId()));				
 			}
 		}
 	}
@@ -543,7 +543,7 @@ public class Sykkelkoll extends MapActivity {
 		URI uri = null;
 
 		try {
-				uri = new URI("http://bysykel.appspot.com/json");
+				uri = new URI("http://bysykel-3.appspot.com/json");
 				httpGet.setURI(uri);
 
 				HttpResponse httpResponse = httpClient.execute(httpGet);
@@ -656,13 +656,15 @@ public class Sykkelkoll extends MapActivity {
 			station.setDescription(c.getString(descriptionColumnIndex));
 			station.setId(c.getInt(idColumnIndex));
 			stationsMap.put(station.getId(), station);
+			c.moveToNext();
 		}
+		c.close();
 		return stationsMap;
 	}
 	
 	public void createOverlays() {
 		stopWatch.start();
-		Drawable drawable = this.getResources().getDrawable(R.drawable.m0);
+		Drawable drawable = graphicsProvider.getPinDrawable(0);
 		drawable.setBounds(-drawable.getIntrinsicWidth(),
 				-drawable.getIntrinsicHeight(), 0, 0);
 
