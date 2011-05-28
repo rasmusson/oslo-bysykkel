@@ -10,8 +10,9 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:clickable="true"
-        android:apiKey="0V06DE2HsZ9sdQ1Dq7H8cvNluneWaNcL1IJyJ1Q"
-    />
+        android:apiKey="0V06DE2HsZ9vgBBviBNFYx14yWMAsNmi2g8KK3g"/>
+        <!-- Debug android:apiKey="0V06DE2HsZ9sdQ1Dq7H8cvNluneWaNcL1IJyJ1Q" -->
+    
     
     <Button android:id="@+id/toggleButton"
             android:layout_width="wrap_content"

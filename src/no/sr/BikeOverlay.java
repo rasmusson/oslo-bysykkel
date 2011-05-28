@@ -51,4 +51,10 @@ public class BikeOverlay extends ItemizedOverlay<BikeOverlayItem> {
 	protected BikeOverlayItem createItem(final int i) {
 		return mOverlays.get(i);
 	}
+	
+	@Override
+	protected boolean onTap(int index) {
+		// TODO Auto-generated method stub
+		return super.onTap(index);
+	}
 }

@@ -51,5 +51,6 @@ public class Station {
 		setBikesReady(stationSmall.getBikesReady());
 		setLocksReady(stationSmall.getEmptyLocks());
 		setOnlone(stationSmall.getOnline());
+		setId(stationSmall.getId());
 	}
 }

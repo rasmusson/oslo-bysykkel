@@ -18,6 +18,7 @@
 package no.sr;
 
 import java.io.BufferedReader;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,12 +30,16 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -84,6 +89,9 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+
 public class Sykkelkoll extends MapActivity {
 
 	private static final String LOG_TAG_TIMING = "Timing";
@@ -100,7 +108,7 @@ public class Sykkelkoll extends MapActivity {
 	private final Timer stopWatch = new Timer();
 	private StationsOpenHelper stationsHelper;
 	private Map<Integer, Station> globalStationsMap;
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -122,7 +130,7 @@ public class Sykkelkoll extends MapActivity {
 				mapView.getController().animateTo(myLocOverlay.getMyLocation());
 				mapView.getController().setZoom(16);
 			} else {
-				CharSequence text = "Kan ikke fastsl� position";
+				CharSequence text = "Kan ikke fastslå position";
 				int duration = Toast.LENGTH_SHORT;
 
 				Toast toast = Toast.makeText(this, text, duration);
@@ -151,8 +159,7 @@ public class Sykkelkoll extends MapActivity {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(
 					"Internett-tilkobling trengs for at bruke applikasjonen")
-					.setCancelable(false)
-					.setNeutralButton("OK",
+					.setCancelable(false).setNeutralButton("OK",
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int id) {
@@ -194,7 +201,9 @@ public class Sykkelkoll extends MapActivity {
 		if (!isInternetEnabled()) {
 			showDialog(NO_INTERNET_ACCESS_DIALOG);
 		} else {
-			Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
+			Thread
+					.setDefaultUncaughtExceptionHandler(new ExceptionHandler(
+							this));
 			String stackTrace = getStoredStackTrace();
 			if (stackTrace != null) {
 				Log.i(getClass().getSimpleName() + "-" + "mailStackTrace",
@@ -238,7 +247,9 @@ public class Sykkelkoll extends MapActivity {
 					Log.d(getClass().getSimpleName() + "-" + LOG_TAG_BUTTON,
 							"Click toggle button");
 					if (renderReadyBikes == false) {
-						Log.d(getClass().getSimpleName() + "-" + LOG_TAG_BUTTON,
+						Log.d(
+								getClass().getSimpleName() + "-"
+										+ LOG_TAG_BUTTON,
 								"Toggle button show bikes");
 						renderReadyBikes = true;
 						((Button) v).setText("Vis lås");
@@ -246,7 +257,9 @@ public class Sykkelkoll extends MapActivity {
 						render();
 						dismissDialog(LOADING_STATIONS_DIALOG);
 					} else if (renderReadyBikes == true) {
-						Log.d(getClass().getSimpleName() + "-" + LOG_TAG_BUTTON,
+						Log.d(
+								getClass().getSimpleName() + "-"
+										+ LOG_TAG_BUTTON,
 								"Toggle button show slots");
 						renderReadyBikes = false;
 						((Button) v).setText("Vis sykkler");
@@ -294,7 +307,8 @@ public class Sykkelkoll extends MapActivity {
 		private void updateOverlays() {
 			for (int i = 0; i < bikeOverlay.size(); i++) {
 				BikeOverlayItem overlayItem = bikeOverlay.getItem(i);
-				overlayItem.setStation(globalStationsMap.get(overlayItem.getStation().getId()));				
+				overlayItem.setStation(globalStationsMap.get(overlayItem
+						.getStation().getId()));
 			}
 		}
 	}
@@ -336,7 +350,7 @@ public class Sykkelkoll extends MapActivity {
 		public Cursor getStations() {
 			return stationsDB.rawQuery("select * from station;", null);
 		}
-		
+
 		public void addStation(Station newStation) {
 			ContentValues params = new ContentValues();
 
@@ -375,7 +389,7 @@ public class Sykkelkoll extends MapActivity {
 			try {
 				String myPath = DB_PATH + DB_NAME;
 				checkDB = SQLiteDatabase.openDatabase(myPath, null,
-						SQLiteDatabase.OPEN_READONLY);
+						SQLiteDatabase.OPEN_READWRITE);
 
 			} catch (SQLiteException e) {
 				Log.e("Sykkelkoll-" + "IO", e.getMessage(), e);
@@ -413,7 +427,7 @@ public class Sykkelkoll extends MapActivity {
 		public void openDataBase() throws SQLException {
 			String myPath = DB_PATH + DB_NAME;
 			stationsDB = SQLiteDatabase.openDatabase(myPath, null,
-					SQLiteDatabase.OPEN_READONLY);
+					SQLiteDatabase.OPEN_READWRITE);
 		}
 
 		@Override
@@ -476,13 +490,14 @@ public class Sykkelkoll extends MapActivity {
 		} catch (FileNotFoundException fnfe) {
 			return null;
 		} catch (IOException ioe) {
-			Log.e(getClass().getSimpleName() + "-" + "mailStackTrace",
-					ioe.getMessage(), ioe);
+			Log.e(getClass().getSimpleName() + "-" + "mailStackTrace", ioe
+					.getMessage(), ioe);
 		}
 		return storedStackTrace.toString();
 	}
 
-	private List<StationSmall> toStationSmallList(InputStream content) throws JSONException, IOException {
+	private List<StationSmall> toStationSmallList(InputStream content)
+			throws JSONException, IOException {
 		List<StationSmall> stationSmallList = new ArrayList<StationSmall>();
 		JSONArray jsonStationsArray = new JSONArray(streamToString(content));
 		for (int i = 0; i < jsonStationsArray.length(); i++) {
@@ -494,8 +509,8 @@ public class Sykkelkoll extends MapActivity {
 			stationSmall.setOnline(jsonStation.getBoolean("online"));
 			stationSmallList.add(stationSmall);
 		}
-		
-		return stationSmallList;	
+
+		return stationSmallList;
 	}
 
 	private String streamToString(InputStream is) throws IOException {
@@ -529,8 +544,9 @@ public class Sykkelkoll extends MapActivity {
 				"Init my location " + stopWatch.getElapsedTime());
 
 	}
-	
-	public void populateStationsWithBackendData(Map<Integer, Station> stationsMap) {
+
+	public void populateStationsWithBackendData(
+			Map<Integer, Station> stationsMap) {
 		stopWatch.start();
 
 		HttpGet httpGet = new HttpGet();
@@ -543,56 +559,59 @@ public class Sykkelkoll extends MapActivity {
 		URI uri = null;
 
 		try {
-				uri = new URI("http://bysykel-3.appspot.com/json");
-				httpGet.setURI(uri);
+			uri = new URI("http://bysykel-3.appspot.com/json");
+			httpGet.setURI(uri);
 
-				HttpResponse httpResponse = httpClient.execute(httpGet);
+			HttpResponse httpResponse = httpClient.execute(httpGet);
 
-				stopWatch.stop();
-				Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
-						"Download " + stopWatch.getElapsedTime());
-				stopWatch.start();
-				
-				List<StationSmall> stationSmallList = null;
-				try {
-					stationSmallList = toStationSmallList(httpResponse.getEntity().getContent());
-				} catch (IllegalStateException e) {
-					Log.e("Error", e.getMessage());
-					e.printStackTrace();
-				} catch (JSONException e) {
-					Log.e("Error", e.getMessage());
-					e.printStackTrace();
-				}
-				
-				stopWatch.stop();
-				Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
-						"Parsing " + stopWatch.getElapsedTime());
-				
-				for (StationSmall stationSmall : stationSmallList) {
-					if (stationsMap.containsKey(stationSmall.getId())) {
-						stationsMap.get(stationSmall.getId()).populateFromStationSmall(stationSmall);
-					} else {
-						Station newStation = downloadNewStationInfo(stationSmall.getId(), httpClient);
-						stationsHelper.addStation(newStation);
-						newStation.populateFromStationSmall(stationSmall);
-						stationsMap.put(newStation.getId(), newStation);
-					}					
-				}
-			} catch (URISyntaxException e) {
-				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
-						e);
-			} catch (ClientProtocolException e) {
-				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
-						e);
-			} catch (IOException e) {
-				Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
-						e);
+			stopWatch.stop();
+			Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
+					"Download " + stopWatch.getElapsedTime());
+			stopWatch.start();
+
+			List<StationSmall> stationSmallList = null;
+			try {
+				stationSmallList = toStationSmallList(httpResponse.getEntity()
+						.getContent());
+			} catch (IllegalStateException e) {
+				Log.e("Error", e.getMessage());
+				e.printStackTrace();
+			} catch (JSONException e) {
+				Log.e("Error", e.getMessage());
+				e.printStackTrace();
 			}
+
+			stopWatch.stop();
+			Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Parsing "
+					+ stopWatch.getElapsedTime());
+
+			for (StationSmall stationSmall : stationSmallList) {
+				if (stationsMap.containsKey(stationSmall.getId())) {
+					stationsMap.get(stationSmall.getId())
+							.populateFromStationSmall(stationSmall);
+				} /*else {
+					Station newStation = downloadNewStationInfo(stationSmall
+							.getId(), httpClient);
+					
+					
+					newStation.populateFromStationSmall(stationSmall);
+					stationsHelper.addStation(newStation);
+					stationsMap.put(newStation.getId(), newStation);
+				}*/
+
+		}
+		} catch (URISyntaxException e) {
+			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(), e);
+		} catch (ClientProtocolException e) {
+			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(), e);
+		} catch (IOException e) {
+			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(), e);
+		}
 	}
 
 	private Station downloadNewStationInfo(Integer id, HttpClient httpClient) {
-		String url = "http://smartbikeportal.clearchannel.no/public/mobapp/maq.asmx/getRack?id=" + id;
-		
+		String url = "http://www.adshel.no/js/getracknr.php?id=" + id;
+
 		HttpGet httpGet = new HttpGet();
 		Station station = null;
 		try {
@@ -610,35 +629,69 @@ public class Sykkelkoll extends MapActivity {
 			e.printStackTrace();
 		}
 		return station;
-		
+
 	}
 
 	private Station parseXMLStation(InputStream content) {
-		SAXParserFactory spf = SAXParserFactory.newInstance();
-		XMLStationHandler xmlStationHandler = null;
-		try {
-			SAXParser sp = spf.newSAXParser();
-			XMLReader xr = sp.getXMLReader();
-			xmlStationHandler = new XMLStationHandler();
-			xr.setContentHandler(xmlStationHandler);
-			xr.parse(new InputSource(content));
+			DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder;
+			Station s = null;
+				try {
+					builder = builderFactory.newDocumentBuilder();
 				
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return 	xmlStationHandler.getData();
+					Document doc = builder.parse(content);
+					s = new Station();
+					Integer longitude = new Double(Double.parseDouble(doc
+							.getElementsByTagName("longitute").item(0)
+							.getChildNodes().item(0).getNodeValue()) * 1000000)
+							.intValue();
+
+					Integer latitude = new Double(Double.parseDouble(doc
+							.getElementsByTagName("latitude").item(0)
+							.getChildNodes().item(0).getNodeValue()) * 1000000)
+							.intValue();
+
+					s.setLocation(new GeoPoint(latitude, longitude));
+					String descripion[] = doc.getElementsByTagName("description").item(
+							0).getChildNodes().item(0).getNodeValue().split("-");
+					if (descripion.length == 2) {
+						s.setDescription(descripion[1]);
+					} else if (descripion.length == 1) {
+						s.setDescription(descripion[0]);
+					} else if (descripion.length > 2) {
+						descripion[0] = "";
+						s.setDescription(arrayToString(descripion, "").trim());
+					}
+
+				} catch (ParserConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SAXException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+							
+		return 	s;
 		
 	}
 
+	public static String arrayToString(String[] a, String separator) {
+		StringBuffer result = new StringBuffer();
+		if (a.length > 0) {
+			result.append(a[0]);
+			for (int i = 1; i < a.length; i++) {
+				result.append(separator);
+				result.append(a[i]);
+			}
+		}
+		return result.toString();
+	}
+
 	public Map<Integer, Station> getStationsFromDataBase() {
-		
+
 		Map<Integer, Station> stationsMap = new HashMap<Integer, Station>();
 		Cursor c = stationsHelper.getStations();
 		c.moveToFirst();
@@ -650,8 +703,8 @@ public class Sykkelkoll extends MapActivity {
 		while (c.isAfterLast() == false && count != 10) {
 
 			Station station = new Station();
-			station.setLocation(new GeoPoint(c.getInt(latitudeColumnIndex),
-					c.getInt(longitudeColumnIndex)));
+			station.setLocation(new GeoPoint(c.getInt(latitudeColumnIndex), c
+					.getInt(longitudeColumnIndex)));
 
 			station.setDescription(c.getString(descriptionColumnIndex));
 			station.setId(c.getInt(idColumnIndex));
@@ -661,25 +714,26 @@ public class Sykkelkoll extends MapActivity {
 		c.close();
 		return stationsMap;
 	}
-	
+
 	public void createOverlays() {
 		stopWatch.start();
 		Drawable drawable = graphicsProvider.getPinDrawable(0);
-		drawable.setBounds(-drawable.getIntrinsicWidth(),
-				-drawable.getIntrinsicHeight(), 0, 0);
+		drawable.setBounds(-drawable.getIntrinsicWidth(), -drawable
+				.getIntrinsicHeight(), 0, 0);
 
 		bikeOverlay = new BikeOverlay(drawable, this);
 
 		this.mapView.getController().setCenter(this.mapView.getMapCenter());
 
-		for (Integer stationId : globalStationsMap.keySet()) {			
-			BikeOverlayItem overlayitem = new BikeOverlayItem(globalStationsMap.get(stationId));
+		for (Integer stationId : globalStationsMap.keySet()) {
+			BikeOverlayItem overlayitem = new BikeOverlayItem(globalStationsMap
+					.get(stationId));
 			overlayitem.setBikeMarker(graphicsProvider.getPinDrawable(0));
 			bikeOverlay.addOverlay(overlayitem);
 		}
 		stopWatch.stop();
-		Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Create overlays "
-				+ stopWatch.getElapsedTime());
+		Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
+				"Create overlays " + stopWatch.getElapsedTime());
 
 	}
 
@@ -693,24 +747,29 @@ public class Sykkelkoll extends MapActivity {
 			BikeOverlayItem bikeItem = bikeOverlay.getItem(i);
 
 			Drawable bikePin;
-		if (renderReadyBikes) {
-			bikePin = graphicsProvider.getPinDrawable(bikeItem.getStation().getBikesReady());
-			bikePin.setBounds(-bikePin.getIntrinsicWidth(),-bikePin.getIntrinsicHeight(), 0, 0);
-		} else {
-			bikePin = graphicsProvider.getPinDrawable(bikeItem.getStation().getLocksReady());
-			bikePin.setBounds(-bikePin.getIntrinsicWidth(),-bikePin.getIntrinsicHeight(), 0, 0);
-		}
-		
+			if (renderReadyBikes) {
+				bikePin = graphicsProvider.getPinDrawable(bikeItem.getStation()
+						.getBikesReady());
+				bikePin.setBounds(-bikePin.getIntrinsicWidth(), -bikePin
+						.getIntrinsicHeight(), 0, 0);
+			} else {
+				bikePin = graphicsProvider.getPinDrawable(bikeItem.getStation()
+						.getLocksReady());
+				bikePin.setBounds(-bikePin.getIntrinsicWidth(), -bikePin
+						.getIntrinsicHeight(), 0, 0);
+			}
+
 			bikeItem.setBikeMarker(bikePin);
 		}
 		mapOverlays.add(bikeOverlay);
-		
+
 		mapView.getController().animateTo(mapView.getMapCenter());
 		stopWatch.stop();
 		Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Render "
 				+ stopWatch.getElapsedTime());
 
 	}
+
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
