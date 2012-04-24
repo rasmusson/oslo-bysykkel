@@ -19,6 +19,7 @@ package no.sr;
 
 import java.io.BufferedReader;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -343,7 +344,7 @@ public class Sykkelkoll extends MapActivity {
 		private Context context;
 
 		StationsOpenHelper(Context context) {
-			super(context, DB_NAME, null, 1);
+			super(context, DB_NAME, null, 3);
 			this.context = context;
 		}
 
@@ -407,7 +408,6 @@ public class Sykkelkoll extends MapActivity {
 		private void copyDataBase() throws IOException {
 
 			InputStream myInput = context.getAssets().open(DB_NAME);
-
 			String outFileName = DB_PATH + DB_NAME;
 
 			OutputStream myOutput = new FileOutputStream(outFileName);
@@ -423,6 +423,7 @@ public class Sykkelkoll extends MapActivity {
 			myInput.close();
 
 		}
+		
 
 		public void openDataBase() throws SQLException {
 			String myPath = DB_PATH + DB_NAME;
@@ -447,7 +448,16 @@ public class Sykkelkoll extends MapActivity {
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+			if (oldVersion < newVersion) {
+			String myPath = DB_PATH + DB_NAME;
+			new File(myPath).delete();
+			try {
+				copyDataBase();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			}
 		}
 
 	}
@@ -589,17 +599,17 @@ public class Sykkelkoll extends MapActivity {
 				if (stationsMap.containsKey(stationSmall.getId())) {
 					stationsMap.get(stationSmall.getId())
 							.populateFromStationSmall(stationSmall);
-				} /*else {
-					Station newStation = downloadNewStationInfo(stationSmall
-							.getId(), httpClient);
-					
-					
-					newStation.populateFromStationSmall(stationSmall);
-					stationsHelper.addStation(newStation);
-					stationsMap.put(newStation.getId(), newStation);
-				}*/
+				} /*
+				 * else { Station newStation =
+				 * downloadNewStationInfo(stationSmall .getId(), httpClient);
+				 * 
+				 * 
+				 * newStation.populateFromStationSmall(stationSmall);
+				 * stationsHelper.addStation(newStation);
+				 * stationsMap.put(newStation.getId(), newStation); }
+				 */
 
-		}
+			}
 		} catch (URISyntaxException e) {
 			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(), e);
 		} catch (ClientProtocolException e) {
@@ -633,49 +643,48 @@ public class Sykkelkoll extends MapActivity {
 	}
 
 	private Station parseXMLStation(InputStream content) {
-			DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder;
-			Station s = null;
-				try {
-					builder = builderFactory.newDocumentBuilder();
-				
-					Document doc = builder.parse(content);
-					s = new Station();
-					Integer longitude = new Double(Double.parseDouble(doc
-							.getElementsByTagName("longitute").item(0)
-							.getChildNodes().item(0).getNodeValue()) * 1000000)
-							.intValue();
+		DocumentBuilderFactory builderFactory = DocumentBuilderFactory
+				.newInstance();
+		DocumentBuilder builder;
+		Station s = null;
+		try {
+			builder = builderFactory.newDocumentBuilder();
 
-					Integer latitude = new Double(Double.parseDouble(doc
-							.getElementsByTagName("latitude").item(0)
-							.getChildNodes().item(0).getNodeValue()) * 1000000)
-							.intValue();
+			Document doc = builder.parse(content);
+			s = new Station();
+			Integer longitude = new Double(Double.parseDouble(doc
+					.getElementsByTagName("longitute").item(0).getChildNodes()
+					.item(0).getNodeValue()) * 1000000).intValue();
 
-					s.setLocation(new GeoPoint(latitude, longitude));
-					String descripion[] = doc.getElementsByTagName("description").item(
-							0).getChildNodes().item(0).getNodeValue().split("-");
-					if (descripion.length == 2) {
-						s.setDescription(descripion[1]);
-					} else if (descripion.length == 1) {
-						s.setDescription(descripion[0]);
-					} else if (descripion.length > 2) {
-						descripion[0] = "";
-						s.setDescription(arrayToString(descripion, "").trim());
-					}
+			Integer latitude = new Double(Double.parseDouble(doc
+					.getElementsByTagName("latitude").item(0).getChildNodes()
+					.item(0).getNodeValue()) * 1000000).intValue();
 
-				} catch (ParserConfigurationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SAXException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-							
-		return 	s;
-		
+			s.setLocation(new GeoPoint(latitude, longitude));
+			String descripion[] = doc.getElementsByTagName("description").item(
+					0).getChildNodes().item(0).getNodeValue().split("-");
+			if (descripion.length == 2) {
+				s.setDescription(descripion[1]);
+			} else if (descripion.length == 1) {
+				s.setDescription(descripion[0]);
+			} else if (descripion.length > 2) {
+				descripion[0] = "";
+				s.setDescription(arrayToString(descripion, "").trim());
+			}
+
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return s;
+
 	}
 
 	public static String arrayToString(String[] a, String separator) {
@@ -726,10 +735,12 @@ public class Sykkelkoll extends MapActivity {
 		this.mapView.getController().setCenter(this.mapView.getMapCenter());
 
 		for (Integer stationId : globalStationsMap.keySet()) {
-			BikeOverlayItem overlayitem = new BikeOverlayItem(globalStationsMap
-					.get(stationId));
-			overlayitem.setBikeMarker(graphicsProvider.getPinDrawable(0));
-			bikeOverlay.addOverlay(overlayitem);
+			if (globalStationsMap.get(stationId) != null) {
+				BikeOverlayItem overlayitem = new BikeOverlayItem(
+						globalStationsMap.get(stationId));
+				overlayitem.setBikeMarker(graphicsProvider.getPinDrawable(0));
+				bikeOverlay.addOverlay(overlayitem);
+			}
 		}
 		stopWatch.stop();
 		Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
