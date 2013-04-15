@@ -595,11 +595,20 @@ public class Sykkelkoll extends MapActivity {
 			Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Parsing "
 					+ stopWatch.getElapsedTime());
 
+			//Remove stations that is no longer in the system
+			Map<Integer, Station> cleanedStationsMap = new HashMap<Integer, Station>();
 			for (StationSmall stationSmall : stationSmallList) {
 				if (stationsMap.containsKey(stationSmall.getId())) {
-					stationsMap.get(stationSmall.getId())
-							.populateFromStationSmall(stationSmall);
-				} /*
+					Station populatedStation = stationsMap.get(stationSmall.getId());
+					populatedStation.populateFromStationSmall(stationSmall);
+					cleanedStationsMap.put(stationSmall.getId(), populatedStation);
+				
+			}
+					
+			stationsMap.clear();
+			stationsMap.putAll(cleanedStationsMap);
+				
+				/*
 				 * else { Station newStation =
 				 * downloadNewStationInfo(stationSmall .getId(), httpClient);
 				 * 
