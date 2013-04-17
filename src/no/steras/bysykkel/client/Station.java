@@ -1,11 +1,11 @@
 package no.steras.bysykkel.client;
 
-import com.google.android.maps.GeoPoint;
+import com.google.android.gms.maps.model.LatLng;
 
 public class Station {
 
 	private Integer id;
-	private GeoPoint location;
+	private LatLng location;
 	private String description;
 	private Integer bikesReady;
 	private Integer locksReady;
@@ -16,10 +16,10 @@ public class Station {
 	public void setId(Integer id) {
 		this.id = id;
 	}
-	public GeoPoint getLocation() {
+	public LatLng getLocation() {
 		return location;
 	}
-	public void setLocation(GeoPoint location) {
+	public void setLocation(LatLng location) {
 		this.location = location;
 	}
 	public String getDescription() {

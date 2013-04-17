@@ -20,5 +20,5 @@ package no.steras.bysykkel.client;
 import android.graphics.drawable.Drawable;
 
 public interface GraphicsProvider {
-	Drawable getPinDrawable(int pinNumber);
+	int getPinResource(int pinNumber);
 }

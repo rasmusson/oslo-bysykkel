@@ -16,7 +16,7 @@
     rasmusson.stefan@gmail.com
 */
 package no.steras.bysykkel.client;
-
+/*
 import java.util.ArrayList;
 
 import android.content.Context;
@@ -57,4 +57,5 @@ public class BikeOverlay extends ItemizedOverlay<BikeOverlayItem> {
 		// TODO Auto-generated method stub
 		return super.onTap(index);
 	}
-}
+	
+}*/

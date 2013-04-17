@@ -17,7 +17,7 @@
 */
 package no.steras.bysykkel.client;
 
-import android.graphics.drawable.Drawable;
+/*import android.graphics.drawable.Drawable;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.OverlayItem;
@@ -61,4 +61,4 @@ public class BikeOverlayItem extends OverlayItem {
 	public void setStation(Station station) {
 		this.station = station;
 	}
-}
+}*/

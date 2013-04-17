@@ -9,8 +9,7 @@
         android:id="@+id/mapview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:clickable="true"
-        android:apiKey="0V06DE2HsZ9sdQ1Dq7H8cvNluneWaNcL1IJyJ1Q"/ -->
+        android:clickable="true"/-->
         <!-- Debug android:apiKey="0V06DE2HsZ9sdQ1Dq7H8cvNluneWaNcL1IJyJ1Q" -->
         <!-- Pub android:apiKey="0V06DE2HsZ9vgBBviBNFYx14yWMAsNmi2g8KK3g"/> -->
     
@@ -21,8 +20,12 @@
             android:layout_centerHorizontal="true" android:layout_alignParentBottom="true"/-->
 
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    	  xmlns:map="http://schemas.android.com/apk/res-auto"
           android:id="@+id/map"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
-          android:name="com.google.android.gms.maps.MapFragment"/>
+          android:name="com.google.android.gms.maps.SupportMapFragment"
+          map:cameraTargetLat="59.920786"
+  		  map:cameraTargetLng="10.741711"
+  		  map:cameraZoom="12"/>
 </RelativeLayout>

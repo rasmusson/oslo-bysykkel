@@ -18,6 +18,55 @@
 package no.steras.bysykkel.client;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreConnectionPNames;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.util.Pair;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+
+/*
+import java.io.BufferedReader;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -200,7 +249,7 @@ public class Sykkelkoll extends MapActivity {
 				"Application starts");
 		setContentView(R.layout.main);
 
-	/*	setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		if (!isInternetEnabled()) {
 			showDialog(NO_INTERNET_ACCESS_DIALOG);
 		} else {
@@ -273,16 +322,16 @@ public class Sykkelkoll extends MapActivity {
 				}
 			});
 
-		}*/
+		}
 	}
 
-/*	@Override
+	@Override
 	protected void onStart() {
 		super.onStart();
 		mapView = (MapView) findViewById(R.id.mapview);
 		mapView.setBuiltInZoomControls(true);
 	}
-*/
+
 	private class RenderTask extends AsyncTask<Void, Void, Void> {
 
 		@Override
@@ -334,7 +383,6 @@ public class Sykkelkoll extends MapActivity {
 	}
 
 	private void checkGoogleServicesStatus() {
-		//thisthat
 		
 	}
 
@@ -616,15 +664,7 @@ public class Sykkelkoll extends MapActivity {
 			stationsMap.clear();
 			stationsMap.putAll(cleanedStationsMap);
 				
-				/*
-				 * else { Station newStation =
-				 * downloadNewStationInfo(stationSmall .getId(), httpClient);
-				 * 
-				 * 
-				 * newStation.populateFromStationSmall(stationSmall);
-				 * stationsHelper.addStation(newStation);
-				 * stationsMap.put(newStation.getId(), newStation); }
-				 */
+				
 
 			}
 		} catch (URISyntaxException e) {
@@ -801,5 +841,403 @@ public class Sykkelkoll extends MapActivity {
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
+	}
+}*/
+
+public class Sykkelkoll extends FragmentActivity {
+	GoogleMap mMap;
+	Activity activity;
+	Marker myLocationMarker;
+	
+	private static final String LOG_TAG_TIMING = "Timing";
+	private static final String LOG_TAG_BUTTON = "Button";
+	private static final String LOG_TAG_LIFECYCLE = "Lifecycle";
+	private static final int NO_INTERNET_ACCESS_DIALOG = 1;
+	private static final int LOADING_STATIONS_DIALOG = 2;
+
+	private Boolean renderReadyBikes = true;
+	private GraphicsProvider graphicsProvider;
+	private final Timer stopWatch = new Timer();
+	private StationsOpenHelper stationsHelper;
+	private Map<Integer, Station> globalStationsMap;
+	
+	private List<Pair<MarkerOptions, Station>> markerList = new ArrayList<Pair<MarkerOptions,Station>>();
+	public void onCreate(final Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		
+		activity = this;
+		setContentView(R.layout.main);
+		
+		setUpMapIfNeeded();
+		initMyLocation();
+		
+		
+		initDb();
+
+		graphicsProvider = new DefaultGraphicsProvider(this);
+		loadMarkers();
+		
+		updateMarkers();
+	/*	
+		
+		Button toggleButton = (Button) findViewById(R.id.toggleButton);
+		toggleButton.setText("Vis lås");
+		toggleButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Log.d(getClass().getSimpleName() + "-" + LOG_TAG_BUTTON,
+						"Click toggle button");
+				if (renderReadyBikes == false) {
+					Log.d(
+							getClass().getSimpleName() + "-"
+									+ LOG_TAG_BUTTON,
+							"Toggle button show bikes");
+					renderReadyBikes = true;
+					((Button) v).setText("Vis lås");
+					showDialog(LOADING_STATIONS_DIALOG);
+					render();
+					dismissDialog(LOADING_STATIONS_DIALOG);
+				} else if (renderReadyBikes == true) {
+					Log.d(
+							getClass().getSimpleName() + "-"
+									+ LOG_TAG_BUTTON,
+							"Toggle button show slots");
+					renderReadyBikes = false;
+					((Button) v).setText("Vis sykkler");
+					showDialog(LOADING_STATIONS_DIALOG);
+					render();
+					dismissDialog(LOADING_STATIONS_DIALOG);
+				}
+			}
+		});
+
+	}*/
+		
+	}
+
+	private void updateMarkers() {
+		for (Pair<MarkerOptions, Station> pair : markerList) {
+			try {
+			pair.first.icon(
+					BitmapDescriptorFactory.fromResource(graphicsProvider.getPinResource(pair.second.getBikesReady())));
+			} catch (Exception e) {
+				System.out.println();
+			}
+		}
+		
+		
+	}
+
+	private void loadMarkers() {
+		showDialog(LOADING_STATIONS_DIALOG);
+		
+		
+
+		globalStationsMap = getStationsFromDataBase();
+		populateStationsWithBackendData(globalStationsMap);
+		
+		stopWatch.start();
+			
+		for (Integer stationId : globalStationsMap.keySet()) {
+				Station station = globalStationsMap.get(stationId); 
+				if (station != null) {
+					MarkerOptions marker = new MarkerOptions()
+					.position(station.getLocation());
+					mMap.addMarker(marker
+						);
+					markerList.add(new Pair<MarkerOptions, Station>(marker, station));
+					
+				}
+		}
+			stopWatch.stop();
+			Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
+					"Create overlays " + stopWatch.getElapsedTime());
+
+			dismissDialog(Sykkelkoll.LOADING_STATIONS_DIALOG);
+
+
+	
+	}
+
+	private void initDb() {
+		stationsHelper = new StationsOpenHelper(this);
+		try {
+			stationsHelper.createDataBase();
+		} catch (IOException e) {
+			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
+					e);
+		}
+
+		try {
+			stationsHelper.openDataBase();
+
+		} catch (SQLException e) {
+			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(),
+					e);
+		}
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		checkGoogleServicesStatus();
+	}
+	
+	private void checkGoogleServicesStatus() {
+		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity.getApplicationContext());
+		if (resultCode == ConnectionResult.SUCCESS) {
+//		    activity.selectMap();
+		} else if (resultCode == ConnectionResult.SERVICE_MISSING ||
+		           resultCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED ||
+		           resultCode == ConnectionResult.SERVICE_DISABLED) {
+		    Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, activity, 1);
+		    dialog.show();
+		}
+		
+	}
+
+	private void setUpMapIfNeeded() {
+	    // Do a null check to confirm that we have not already instantiated the map.
+	    if (mMap == null) {
+	        mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+	                            .getMap();
+	        // Check if we were successful in obtaining the map.
+	        if (mMap != null) {
+	            // The Map is verified. It is now safe to manipulate the map.
+
+	        }
+	    }
+	}
+	
+	
+	
+	
+	private void initMyLocation() {
+		stopWatch.start();
+		mMap.setMyLocationEnabled(true);
+		mMap.getUiSettings().setMyLocationButtonEnabled(true);
+		
+	}
+	
+	
+	private class RenderTask extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			showDialog(LOADING_STATIONS_DIALOG);
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			dismissDialog(Sykkelkoll.LOADING_STATIONS_DIALOG);
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			globalStationsMap = getStationsFromDataBase();
+			populateStationsWithBackendData(globalStationsMap);
+			addMarkers();
+			updateMarkers();
+			//	render();
+			return null;
+		}
+
+		private void updateMarkers() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		private void addMarkers() {
+			stopWatch.start();
+				
+			for (Integer stationId : globalStationsMap.keySet()) {
+					Station station = globalStationsMap.get(stationId); 
+					if (station != null) {
+						try {
+						mMap.addMarker(new MarkerOptions()
+							.position(station.getLocation()
+							));
+						} catch (Exception e) {
+							System.out.println();
+						}
+						
+					}
+			}
+				stopWatch.stop();
+				Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
+						"Create overlays " + stopWatch.getElapsedTime());
+
+			
+
+			
+		}
+	}
+	
+	public Map<Integer, Station> getStationsFromDataBase() {
+
+		Map<Integer, Station> stationsMap = new HashMap<Integer, Station>();
+		Cursor c = stationsHelper.getStations();
+		c.moveToFirst();
+		int latitudeColumnIndex = c.getColumnIndex("latitude");
+		int longitudeColumnIndex = c.getColumnIndex("longitude");
+		int descriptionColumnIndex = c.getColumnIndex("description");
+		int idColumnIndex = c.getColumnIndex("_id");
+		while (c.isAfterLast() == false) {
+
+			Station station = new Station();
+			station.setLocation(new LatLng(c.getDouble(latitudeColumnIndex), c
+					.getDouble(longitudeColumnIndex)));
+
+			station.setDescription(c.getString(descriptionColumnIndex));
+			station.setId(c.getInt(idColumnIndex));
+			stationsMap.put(station.getId(), station);
+			c.moveToNext();
+		}
+		c.close();
+		return stationsMap;
+	}
+	
+	public void populateStationsWithBackendData(
+			Map<Integer, Station> stationsMap) {
+		stopWatch.start();
+
+		HttpGet httpGet = new HttpGet();
+		HttpClient httpClient = new DefaultHttpClient();
+		httpClient.getParams().setIntParameter(
+				CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
+		httpClient.getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT,
+				10000);
+
+		URI uri = null;
+
+		try {
+			uri = new URI("http://bysykkel-qa.appspot.com/json2");
+			httpGet.setURI(uri);
+
+			HttpResponse httpResponse = httpClient.execute(httpGet);
+
+			stopWatch.stop();
+			Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING,
+					"Download " + stopWatch.getElapsedTime());
+			stopWatch.start();
+
+			List<StationSmall> stationSmallList = null;
+			try {
+				stationSmallList = toStationSmallList(httpResponse.getEntity()
+						.getContent());
+			} catch (IllegalStateException e) {
+				Log.e("Error", e.getMessage());
+				e.printStackTrace();
+			} catch (JSONException e) {
+				Log.e("Error", e.getMessage());
+				e.printStackTrace();
+			}
+
+			stopWatch.stop();
+			Log.i(getClass().getSimpleName() + "-" + LOG_TAG_TIMING, "Parsing "
+					+ stopWatch.getElapsedTime());
+
+			//Remove stations that is no longer in the system
+			Map<Integer, Station> cleanedStationsMap = new HashMap<Integer, Station>();
+			for (StationSmall stationSmall : stationSmallList) {
+				if (stationsMap.containsKey(stationSmall.getId())) {
+					Station populatedStation = stationsMap.get(stationSmall.getId());
+					populatedStation.populateFromStationSmall(stationSmall);
+					cleanedStationsMap.put(stationSmall.getId(), populatedStation);
+				
+			}
+					
+			
+				
+				
+
+			}
+			stationsMap.clear();
+			stationsMap.putAll(cleanedStationsMap);
+		} catch (URISyntaxException e) {
+			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(), e);
+		} catch (ClientProtocolException e) {
+			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(), e);
+		} catch (IOException e) {
+			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(), e);
+		}
+	}
+	
+	private List<StationSmall> toStationSmallList(InputStream content)
+			throws JSONException, IOException {
+		List<StationSmall> stationSmallList = new ArrayList<StationSmall>();
+		JSONArray jsonStationsArray = new JSONArray(streamToString(content));
+		for (int i = 0; i < jsonStationsArray.length(); i++) {
+			JSONObject jsonStation = jsonStationsArray.getJSONObject(i);
+			StationSmall stationSmall = new StationSmall();
+			stationSmall.setId(jsonStation.getInt("id"));
+			stationSmall.setBikesReady(jsonStation.getInt("bikesReady"));
+			stationSmall.setEmptyLocks(jsonStation.getInt("emptyLocks"));
+			stationSmall.setOnline(jsonStation.getBoolean("online"));
+			stationSmallList.add(stationSmall);
+		}
+
+		return stationSmallList;
+	}
+	
+	private String streamToString(InputStream is) throws IOException {
+		if (is != null) {
+			Writer writer = new StringWriter();
+
+			char[] buffer = new char[1024];
+			try {
+				Reader reader = new BufferedReader(new InputStreamReader(is,
+						"UTF-8"));
+				int n;
+				while ((n = reader.read(buffer)) != -1) {
+					writer.write(buffer, 0, n);
+				}
+			} finally {
+				is.close();
+			}
+			return writer.toString();
+		} else {
+			return "";
+		}
+	}
+
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+		case NO_INTERNET_ACCESS_DIALOG:
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(
+					"Internett-tilkobling trengs for at bruke applikasjonen")
+					.setCancelable(false).setNeutralButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.dismiss();
+								}
+							});
+			Dialog dialog = builder.create();
+			dialog.setOnDismissListener(new OnDismissListener() {
+
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					Sykkelkoll.this.finish();
+
+				}
+			});
+			return dialog;
+		case LOADING_STATIONS_DIALOG:
+			ProgressDialog progressDialog = new ProgressDialog(this);
+			progressDialog.setMessage("Oppdaterer stasjoner");
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			progressDialog.setIndeterminate(true);
+			progressDialog.setCancelable(true);
+			return progressDialog;
+		default:
+			dialog = null;
+		}
+		return null;
 	}
 }
