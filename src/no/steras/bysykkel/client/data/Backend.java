@@ -26,7 +26,9 @@ import android.util.Log;
 
 public class Backend {
 
-	private String backendEndpointURL = "http://bysykkel-qa.appspot.com/json2";
+	private String BACKEND_ENDPOINT_URL = "http://bysykkel-prod.appspot.com/json";
+	private String STATIONS_ARRAY_NAME = "stationsData";
+	
 Map<Integer, JSONObject> backendData;
 	
 	
@@ -39,13 +41,13 @@ Map<Integer, JSONObject> backendData;
 	}
 	
 	public void loadData() throws JSONException {
-		backendData = getBackendData(backendEndpointURL);
+		backendData = getBackendData(BACKEND_ENDPOINT_URL);
 	}
 	
 	 Map<Integer, JSONObject> getBackendData(String backendEndpointURL) throws JSONException {
 
 			Map<Integer, JSONObject> backendDataMap = new HashMap<Integer, JSONObject>();
-			JSONArray jsonArray = getJSONArrayFromBackend(backendEndpointURL);
+			JSONArray jsonArray = getStationsJSONArrayFromBackend(backendEndpointURL);
            
              for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -75,21 +77,18 @@ Map<Integer, JSONObject> backendData;
 
 		}
 		
-		 JSONArray getJSONArrayFromBackend(String backendEndpointURL) {
-		 
+		 JSONArray getStationsJSONArrayFromBackend(String backendEndpointURL) {
 
-
-                
-
-						
-						JSONArray array;
+						JSONArray stationsArray;
 						try {
-							array = new JSONArray(getHTMLPage(backendEndpointURL));
+							JSONObject dataObject;
+							dataObject = new JSONObject(getHTMLPage(backendEndpointURL));
+							stationsArray = dataObject.getJSONArray(STATIONS_ARRAY_NAME);
 						} catch (Exception e) {
 							Log.e("Backend", "Invalid JSONObject", e);
-							array = new JSONArray();
+							stationsArray = new JSONArray();
 						}
-						 return array;
+						 return stationsArray;
 		}
 		
 		 boolean isJsonObjectValid(JSONObject jsonObject) {

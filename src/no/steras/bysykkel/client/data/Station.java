@@ -1,7 +1,5 @@
 package no.steras.bysykkel.client.data;
 
-import no.steras.bysykkel.client.StationSmall;
-
 import com.google.android.gms.maps.model.LatLng;
 
 public class Station {
