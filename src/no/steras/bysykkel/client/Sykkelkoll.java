@@ -917,9 +917,7 @@ public class Sykkelkoll extends FragmentActivity {
 	            
 				backend = new Backend();
 				
-				if(!haveNetworkConnection()){
-				    Toast.makeText(this,"No internet connection",Toast.LENGTH_LONG).show();
-				}
+				toastIfNoConnection();
 				
 				List<Station> stations = null;
 				try {
@@ -937,7 +935,13 @@ public class Sykkelkoll extends FragmentActivity {
                 new Handler(Looper.getMainLooper()).post(new RenderThread());
                                 
         }
-        class RenderThread implements Runnable {
+        private void toastIfNoConnection() {
+        	if(!haveNetworkConnection()){
+			    Toast.makeText(this,"Ingen Internett-tilkobling",Toast.LENGTH_LONG).show();
+			}
+			
+		}
+		class RenderThread implements Runnable {
 			public void run() {
 				
 				
@@ -1008,7 +1012,7 @@ public class Sykkelkoll extends FragmentActivity {
 		}
 		
 		private void updateMarkers(Markers markers) throws JSONException {
-			
+			toastIfNoConnection();
 			markers.getFreeBikesMarkers().clear();
 			markers.getFreeLocksMarkers().clear();
 			
