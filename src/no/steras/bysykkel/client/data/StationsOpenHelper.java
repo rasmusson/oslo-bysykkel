@@ -41,7 +41,7 @@ public class StationsOpenHelper extends SQLiteOpenHelper {
 		boolean dbExist = checkDataBase();
 
 		if (!dbExist) {
-			Log.e("Sykkelkoll-" + "IO", "Creating DB");
+			Log.i("Sykkelkoll-" + "IO", "Creating DB");
 			this.getReadableDatabase();
 
 			try {
@@ -49,10 +49,10 @@ public class StationsOpenHelper extends SQLiteOpenHelper {
 				copyDataBase();
 
 			} catch (IOException e) {
-				Log.e("Sykkelkoll-" + "IO", e.getMessage(), e);
+				Log.i("Sykkelkoll-" + "IO", e.getMessage(), e);
 			}
 		} else {
-			Log.e("Sykkelkoll-" + "IO", "else");
+			Log.i("Sykkelkoll-" + "IO", "else");
 		}
 
 	}
@@ -65,19 +65,34 @@ public class StationsOpenHelper extends SQLiteOpenHelper {
 			String myPath = DB_PATH + DB_NAME;
 			checkDB = SQLiteDatabase.openDatabase(myPath, null,
 					SQLiteDatabase.OPEN_READWRITE);
+			
+			
 		} catch (SQLiteException e) {
-			Log.e("Sykkelkoll-" + "IO", e.getMessage(), e);
+			Log.i("Sykkelkoll-" + "IO", e.getMessage(), e);
 		}
 
-		if (checkDB != null) {
-
+		if (checkDB != null) {		
+			boolean isTableExists = isTableExists("station", checkDB);
 			checkDB.close();
+			return isTableExists;
 
 		}
-		Log.e("Sykkelkoll-" + "IO", "Creating DB");
-		return checkDB != null ? true : false;
+		Log.i("Sykkelkoll-" + "IO", "Creating DB");
+		return false;
 	}
 
+	public boolean isTableExists(String tableName, SQLiteDatabase db) {
+	    Cursor cursor = db.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '"+tableName+"'", null);
+	    if(cursor!=null) {
+	        if(cursor.getCount()>0) {
+	                            cursor.close();
+	            return true;
+	        }
+	                    cursor.close();
+	    }
+	    return false;
+	}
+	
 	private void copyDataBase() throws IOException {
 
 		InputStream myInput = context.getAssets().open(DB_NAME);

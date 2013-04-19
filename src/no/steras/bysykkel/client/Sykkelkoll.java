@@ -26,6 +26,7 @@ import java.util.Map;
 import no.steras.bysykkel.client.data.Backend;
 import no.steras.bysykkel.client.data.Station;
 import no.steras.bysykkel.client.data.StationsOpenHelper;
+import no.steras.bysykkel.client.dialog.AboutDialog;
 import no.steras.bysykkel.client.map.DefaultGraphicsProvider;
 import no.steras.bysykkel.client.map.GraphicsProvider;
 import no.steras.bysykkel.client.map.Markers;
@@ -35,6 +36,7 @@ import org.json.JSONException;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.ConnectivityManager;
@@ -853,11 +855,16 @@ public class Sykkelkoll extends FragmentActivity {
         private Markers markers;
         private Backend backend;
         
+        private static final int MENU_ITEM_UPDATE = 1;
+        private static final int MENU_ITEM_ABOUT = 2;
+        private static final int MENU_ITEM_FEEDBACK = 3;
+        
         @Override
     	public boolean onCreateOptionsMenu(final Menu menu) {
     		super.onCreateOptionsMenu(menu);
-    		menu.add(0, 1, 1, "Oppdater");
-    		menu.add(0, 2, 1, "Om Oslo Bysykkel");
+    		menu.add(0, MENU_ITEM_UPDATE, 1, "Oppdater");
+    		menu.add(0, MENU_ITEM_ABOUT, 1, "Om Oslo Bysykkel");
+    		menu.add(0, MENU_ITEM_FEEDBACK, 1, "Tilbakemelding");
 
     		return true;
     	}
@@ -865,7 +872,7 @@ public class Sykkelkoll extends FragmentActivity {
     	@Override
     	public boolean onOptionsItemSelected(final MenuItem item) {
     		switch (item.getItemId()) {
-    		case 1:
+    		case MENU_ITEM_UPDATE:
     			try {
     				updateMarkers(markers);
 				} catch (JSONException e) {
@@ -874,9 +881,21 @@ public class Sykkelkoll extends FragmentActivity {
     			
     			return true;
 
-    		case 2:
-    			//about
+    		case MENU_ITEM_ABOUT:
+    			AboutDialog about = new AboutDialog(this);
+    			about.setGoogleMapsAttribution(GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(activity));
+    			about.show();
     			return true;
+    		
+    		case MENU_ITEM_FEEDBACK:
+    			Intent Email = new Intent(Intent.ACTION_SEND);
+    	        Email.setType("text/email");
+    	        Email.putExtra(Intent.EXTRA_EMAIL, new String[] { "rasmusson.stefan@gmail.com" });
+    	        Email.putExtra(Intent.EXTRA_SUBJECT, "Tilbakemelding på Oslo Bysykkel app");
+    	        Email.putExtra(Intent.EXTRA_TEXT, "" + "");
+    	        startActivity(Intent.createChooser(Email, "Send Tilbakemelding:"));
+    	        return true;
+    		
     		default:
     			return super.onOptionsItemSelected(item);
     		}
