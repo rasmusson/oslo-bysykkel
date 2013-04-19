@@ -34,8 +34,11 @@ import org.json.JSONException;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -895,6 +898,10 @@ public class Sykkelkoll extends FragmentActivity {
 	            
 				backend = new Backend();
 				
+				if(!haveNetworkConnection()){
+				    Toast.makeText(this,"No internet connection",Toast.LENGTH_LONG).show();
+				}
+				
 				List<Station> stations = null;
 				try {
 					stations = loadStations();
@@ -1093,7 +1100,22 @@ public class Sykkelkoll extends FragmentActivity {
             }
         }
         
-        
+        private boolean haveNetworkConnection() {
+            boolean haveConnectedWifi = false;
+            boolean haveConnectedMobile = false;
+
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+            for (NetworkInfo ni : netInfo) {
+                if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                    if (ni.isConnected())
+                        haveConnectedWifi = true;
+                if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                    if (ni.isConnected())
+                        haveConnectedMobile = true;
+            }
+            return haveConnectedWifi || haveConnectedMobile;
+        }
         
         
         private void initMyLocation() {
