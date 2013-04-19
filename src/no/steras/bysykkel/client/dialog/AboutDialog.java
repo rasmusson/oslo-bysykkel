@@ -40,6 +40,7 @@ public class AboutDialog extends Dialog {
 		Linkify.addLinks(tv, Linkify.ALL);
 		
 		String legal = readRawTextFile(R.raw.legal) 
+				+ "\n\n\n\n"
 				+ googleMapsAttribution;
 		 tv = (TextView) findViewById(R.id.legal_text);
 		 tv.setText(legal);
