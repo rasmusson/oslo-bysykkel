@@ -162,6 +162,7 @@ containing a value of this type.
         public static final int normal=0x7f040001;
         public static final int satellite=0x7f040002;
         public static final int terrain=0x7f040003;
+        public static final int toggleButton=0x7f040007;
     }
     public static final class layout {
         public static final int main=0x7f030000;

@@ -27,5 +27,15 @@
           android:name="com.google.android.gms.maps.SupportMapFragment"
           map:cameraTargetLat="59.920786"
   		  map:cameraTargetLng="10.741711"
-  		  map:cameraZoom="12"/>
+  		  map:cameraZoom="13"/>
+
+<Button
+    android:id="@+id/toggleButton"
+    android:layout_width="100dp"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true"
+    android:layout_margin="15dp"
+    android:text="Vis lås" />
+
 </RelativeLayout>
