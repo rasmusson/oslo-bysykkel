@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.google.analytics.tracking.android.EasyTracker;
+
+import no.steras.bysykkel.client.Timer;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -27,9 +30,12 @@ public class StationsOpenHelper extends SQLiteOpenHelper {
 
 	private Context context;
 
+	private Timer stopWatch;
+	
 	public StationsOpenHelper(Context context) {
 		super(context, DB_NAME, null, 3);
 		this.context = context;
+		stopWatch = new Timer();
 	}
 
 	public Cursor getStations() {
@@ -37,7 +43,8 @@ public class StationsOpenHelper extends SQLiteOpenHelper {
 	}
 
 	public void createDataBase() throws IOException {
-
+		stopWatch.start();
+		
 		boolean dbExist = checkDataBase();
 
 		if (!dbExist) {
@@ -54,6 +61,8 @@ public class StationsOpenHelper extends SQLiteOpenHelper {
 		} else {
 			Log.i("Sykkelkoll-" + "IO", "else");
 		}
+		
+		EasyTracker.getTracker().sendTiming("Initial loading time", stopWatch.getElapsedTime(), "createDataBase", null);
 
 	}
 
@@ -114,9 +123,11 @@ public class StationsOpenHelper extends SQLiteOpenHelper {
 	
 
 	public void openDataBase() throws SQLException {
+		stopWatch.start();
 		String myPath = DB_PATH + DB_NAME;
 		stationsDB = SQLiteDatabase.openDatabase(myPath, null,
 				SQLiteDatabase.OPEN_READWRITE);
+		EasyTracker.getTracker().sendTiming("Initial loading time", stopWatch.getElapsedTime(), "openDataBase", null);
 	}
 
 	@Override

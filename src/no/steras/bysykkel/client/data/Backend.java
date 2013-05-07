@@ -35,10 +35,6 @@ Map<Integer, JSONObject> backendData;
 	public Map<Integer, JSONObject> getBackendData() {
 	return backendData;
 }
-
-	public Backend () {
-		
-	}
 	
 	public void loadData() throws JSONException {
 		backendData = getBackendData(BACKEND_ENDPOINT_URL);
