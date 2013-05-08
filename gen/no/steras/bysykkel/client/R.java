@@ -138,30 +138,28 @@ containing a value of this type.
         public static final int ga_reportUncaughtExceptions=0x7f070001;
     }
     public static final class drawable {
-        public static final int gps=0x7f020000;
-        public static final int icon=0x7f020001;
-        public static final int m0=0x7f020002;
-        public static final int m1=0x7f020003;
-        public static final int m10=0x7f020004;
-        public static final int m11=0x7f020005;
-        public static final int m12=0x7f020006;
-        public static final int m13=0x7f020007;
-        public static final int m14=0x7f020008;
-        public static final int m15=0x7f020009;
-        public static final int m16=0x7f02000a;
-        public static final int m17=0x7f02000b;
-        public static final int m18=0x7f02000c;
-        public static final int m19=0x7f02000d;
-        public static final int m2=0x7f02000e;
-        public static final int m20=0x7f02000f;
-        public static final int m3=0x7f020010;
-        public static final int m4=0x7f020011;
-        public static final int m5=0x7f020012;
-        public static final int m6=0x7f020013;
-        public static final int m7=0x7f020014;
-        public static final int m8=0x7f020015;
-        public static final int m9=0x7f020016;
-        public static final int mf=0x7f020017;
+        public static final int icon=0x7f020000;
+        public static final int m0=0x7f020001;
+        public static final int m1=0x7f020002;
+        public static final int m10=0x7f020003;
+        public static final int m11=0x7f020004;
+        public static final int m12=0x7f020005;
+        public static final int m13=0x7f020006;
+        public static final int m14=0x7f020007;
+        public static final int m15=0x7f020008;
+        public static final int m16=0x7f020009;
+        public static final int m17=0x7f02000a;
+        public static final int m18=0x7f02000b;
+        public static final int m19=0x7f02000c;
+        public static final int m2=0x7f02000d;
+        public static final int m20=0x7f02000e;
+        public static final int m3=0x7f02000f;
+        public static final int m4=0x7f020010;
+        public static final int m5=0x7f020011;
+        public static final int m6=0x7f020012;
+        public static final int m7=0x7f020013;
+        public static final int m8=0x7f020014;
+        public static final int m9=0x7f020015;
     }
     public static final class id {
         public static final int hybrid=0x7f050004;
