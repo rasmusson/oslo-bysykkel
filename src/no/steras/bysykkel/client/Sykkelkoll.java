@@ -201,7 +201,7 @@ public class Sykkelkoll extends FragmentActivity {
 			@Override
 			public void onClick(View v) {
 				if (markers.isShowingBikes()) {
-					((Button) v).setText("Vis sykkler");
+					((Button) v).setText("Vis sykler");
 
 					markers.showFreeLockMarkers(mMap);
 
