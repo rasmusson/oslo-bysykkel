@@ -26,10 +26,10 @@ import android.util.Log;
 
 public class Backend {
 
-	private String BACKEND_ENDPOINT_URL = "http://bysykkel-qa.appspot.com/json";
+	private String BACKEND_ENDPOINT_URL = "http://bysykkel-prod.appspot.com/json";
 	private String STATIONS_ARRAY_NAME = "stationsData";
 	
-Map<Integer, JSONObject> backendData;
+	Map<Integer, JSONObject> backendData;
 	
 	
 	public Map<Integer, JSONObject> getBackendData() {

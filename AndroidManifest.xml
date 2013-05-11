@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="no.steras.bysykkel.client"
-      android:versionName="1.0.1" android:versionCode="2">
+      android:versionName="1.0.2" android:versionCode="3">
       <permission
         android:name="no.steras.bysykkel.client.permission.MAPS_RECEIVE"
         android:protectionLevel="signature"/>
@@ -23,10 +23,16 @@
             </intent-filter>
         </activity>        
 
-        <meta-data
+       <!-- Debug -->
+         <!-- meta-data
     android:name="com.google.android.maps.v2.API_KEY"
-    android:value="AIzaSyD-4f6HL5o0nTDiCPSW64wKR2paS02ponI"/>
+    android:value="AIzaSyD-4f6HL5o0nTDiCPSW64wKR2paS02ponI"/-->
    
+         <!-- Prod -->
+         <meta-data
+    android:name="com.google.android.maps.v2.API_KEY"
+    android:value="AIzaSyBYvuNpTu-KTS6fP45m8MF_LI6Awl2Ulrs"/>
+         
     </application>
 
 <uses-feature

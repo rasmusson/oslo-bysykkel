@@ -1,0 +1,5 @@
+Things to do before release 
+
+1. Change Maps api key
+2. Change backend URL to http://bysykkel-prod.appspot.com/json
+ 
