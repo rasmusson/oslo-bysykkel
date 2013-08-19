@@ -3,3 +3,5 @@ Things to do before release
 1. Change Maps api key
 2. Change backend URL to http://bysykkel-prod.appspot.com/json
 3. Change version number from beta
+4. Change version number in about box
+5. Change db verion in SQllitehelper

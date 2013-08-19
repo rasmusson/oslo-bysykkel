@@ -309,18 +309,7 @@ public class Sykkelkoll extends FragmentActivity {
 
 	private void initDb() {
 		stationsHelper = new StationsOpenHelper(this);
-		try {
-			stationsHelper.createDataBase();
-		} catch (IOException e) {
-			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(), e);
-		}
-
-		try {
-			stationsHelper.openDataBase();
-
-		} catch (SQLException e) {
-			Log.e(getClass().getSimpleName() + "-" + "IO", e.getMessage(), e);
-		}
+		stationsHelper.init();
 	}
 
 	@Override
@@ -403,5 +392,10 @@ public class Sykkelkoll extends FragmentActivity {
 		}
 		c.close();
 		return stationsMap;
+	}
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		stationsHelper.close();
 	}
 }
