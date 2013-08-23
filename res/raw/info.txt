@@ -1,5 +1,5 @@
 <h3>Oslo Bysykkel</h3>
-Version 1.0.3b2<br>
+Version 1.0.3b3<br>
 Copyright 2013<br>
 
 <br>

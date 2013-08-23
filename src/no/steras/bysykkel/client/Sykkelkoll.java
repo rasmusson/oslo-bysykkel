@@ -309,7 +309,7 @@ public class Sykkelkoll extends FragmentActivity {
 
 	private void initDb() {
 		stationsHelper = new StationsOpenHelper(this);
-		stationsHelper.init();
+		stationsHelper.initDb();
 	}
 
 	@Override
