@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="no.steras.bysykkel.client"
-      android:versionName="1.0.3" android:versionCode="14">
+      android:versionName="1.0.3" android:versionCode="15">
       <permission
         android:name="no.steras.bysykkel.client.permission.MAPS_RECEIVE"
         android:protectionLevel="signature"/>
