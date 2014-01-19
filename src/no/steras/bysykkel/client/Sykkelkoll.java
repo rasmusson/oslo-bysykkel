@@ -68,7 +68,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class Sykkelkoll extends FragmentActivity {
 	GoogleMap mMap;
 	Activity activity;
-	Marker myLocationMarker;
 
 	private GraphicsProvider graphicsProvider;
 	private final Timer stopWatch = new Timer();
@@ -86,7 +85,6 @@ public class Sykkelkoll extends FragmentActivity {
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(0, MENU_ITEM_UPDATE, 1, "Oppdater");
 		menu.add(0, MENU_ITEM_ABOUT, 1, "Om appen");
 		menu.add(0, MENU_ITEM_FEEDBACK, 1, "Gi tilbakemelding");
 
@@ -96,16 +94,6 @@ public class Sykkelkoll extends FragmentActivity {
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		switch (item.getItemId()) {
-		case MENU_ITEM_UPDATE:
-			try {
-				GATracker.sendEvent("Button actions", "updateButton", "Update stations", null);
-				updateMarkers(markers);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-
-			return true;
-
 		case MENU_ITEM_ABOUT:
 			AboutDialog about = new AboutDialog(this);
 			GATracker.sendEvent("Button actions", "aboutButton", "Open about dialog", null);
@@ -173,7 +161,9 @@ public class Sykkelkoll extends FragmentActivity {
 
 		markers = createMarkers(stations);
 
-		addButtonListener();
+		addFindBikesButtonListener();
+		addFindLocksButtonListener();
+		addUpdateButtonListener();
 		
 		GATracker.sendTiming("Initial loading time", totalLoadingTimeTimer.getElapsedTime(), "totalLoadingTime", "Total loading time");
 
@@ -193,22 +183,43 @@ public class Sykkelkoll extends FragmentActivity {
 
 	}
 
-	private void addButtonListener() {
-		Button toggleButton = (Button) findViewById(R.id.toggleButton);
-		toggleButton.setText("Vis lås");
+	private void addFindBikesButtonListener() {
+		Button toggleButton = (Button) findViewById(R.id.findBikeButton);
 		toggleButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				if (markers.isShowingBikes()) {
-					((Button) v).setText("Vis sykler");
+				markers.showFreeBikeMarkers(mMap);
+			}
 
-					markers.showFreeLockMarkers(mMap);
+		});
 
-				} else if (!markers.isShowingBikes()) {
-					((Button) v).setText("Vis lås");
+	}
+	
+	private void addFindLocksButtonListener() {
+		Button toggleButton = (Button) findViewById(R.id.findLockButton);
+		toggleButton.setOnClickListener(new OnClickListener() {
 
-					markers.showFreeBikeMarkers(mMap);
+			@Override
+			public void onClick(View v) {
+				markers.showFreeLockMarkers(mMap);
+			}
+
+		});
+
+	}
+	
+	private void addUpdateButtonListener() {
+		Button toggleButton = (Button) findViewById(R.id.updateButton);
+		toggleButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				GATracker.sendEvent("Button actions", "updateButton", "Update stations", null);
+				try {
+					updateMarkers(markers);
+				} catch (JSONException e) {
+					throw new RuntimeException(e);
 				}
 			}
 

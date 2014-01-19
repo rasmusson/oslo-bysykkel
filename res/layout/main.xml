@@ -1,23 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mainlayout"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
-
-    <!--com.google.android.maps.MapView
-        android:id="@+id/mapview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:clickable="true"/-->
-        <!-- Debug android:apiKey="0V06DE2HsZ9sdQ1Dq7H8cvNluneWaNcL1IJyJ1Q" -->
-        <!-- Pub android:apiKey="0V06DE2HsZ9vgBBviBNFYx14yWMAsNmi2g8KK3g"/> -->
-    
-    
-    <!--  Button android:id="@+id/toggleButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true" android:layout_alignParentBottom="true"/-->
+    android:layout_height="fill_parent"
+    android:background="@color/buttonbarBackground"
+    android:orientation="vertical" >
 
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     	  xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -29,15 +16,66 @@
   		  map:cameraTargetLng="10.741711"
   		  map:cameraZoom="13"/>
 
-<Button
-    android:id="@+id/toggleButton"
-    
-    android:layout_width="120dp"
-    android:layout_height="75dp"
+<LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
     android:layout_alignParentBottom="true"
-    android:layout_centerHorizontal="true"
-    android:layout_margin="5dp"
-    android:textSize="15dip"
-    android:text="Vis lås" />
+    android:layout_alignParentLeft="true"
+    android:layout_margin="0dp"
+    android:layout_marginLeft="0dp"
+    android:layout_marginRight="0dp"
+    android:background="@color/buttonbarBackground"
+    android:horizontalSpacing="0dp"
+    android:orientation="horizontal"
+    android:padding="0dp"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp" >
 
+	<Button
+	    android:id="@+id/updateButton"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_margin="0dp"
+	    android:layout_marginLeft="0dp"
+	    android:layout_marginRight="0dp"
+	    android:layout_weight="1"
+	    android:drawableTop="@drawable/ic_action_refresh"
+	    android:text="Oppdater"
+	    android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/findBikeButton"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_margin="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_weight="1"
+        android:text="Vis sykkler"
+        android:textSize="15sp" />
+
+    <Button
+        android:id="@+id/findLockButton"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_margin="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_weight="1"
+        android:text="Vis lås"
+        android:textSize="15sp" />
+
+    <Button
+        android:id="@+id/myPositionButton"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_margin="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_weight="1"
+        android:drawableTop="@drawable/ic_action_locate"
+        android:text="Position"
+        android:textSize="14sp" />
+
+</LinearLayout>
 </RelativeLayout>
