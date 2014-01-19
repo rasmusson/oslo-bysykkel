@@ -15,6 +15,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.google.analytics.tracking.android.EasyTracker;
+import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 public class StationsOpenHelper extends SQLiteAssetHelper {
 
@@ -27,7 +28,7 @@ public class StationsOpenHelper extends SQLiteAssetHelper {
 
 	public StationsOpenHelper(Context context) {
 		super(context, DB_NAME, null, DATABASE_VERSION);
-		setForcedUpgradeVersion(DATABASE_VERSION);
+		setForcedUpgrade();
 	}
 	
 	public Cursor getStations() {
