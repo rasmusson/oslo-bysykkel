@@ -14,10 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
     rasmusson.stefan@gmail.com
-*/
+ */
 package no.steras.bysykkel.client.map;
-
-import android.graphics.drawable.Drawable;
 
 public interface GraphicsProvider {
 	int getPinResource(int pinNumber);

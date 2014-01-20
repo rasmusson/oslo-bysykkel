@@ -14,13 +14,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
     rasmusson.stefan@gmail.com
-*/
+ */
 package no.steras.bysykkel.client.map;
 
 import no.steras.bysykkel.client.R;
-import no.steras.bysykkel.client.R.drawable;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 
 public class DefaultGraphicsProvider implements GraphicsProvider {
 
@@ -35,65 +33,45 @@ public class DefaultGraphicsProvider implements GraphicsProvider {
 		int pinResource;
 		if (pinNumber == 0) {
 			pinResource = R.drawable.m0;
-		}
-		else if (pinNumber == 1) {
+		} else if (pinNumber == 1) {
 			pinResource = R.drawable.m1;
-		}
-		else if (pinNumber == 2) {
+		} else if (pinNumber == 2) {
 			pinResource = R.drawable.m2;
-		}
-		else if (pinNumber == 3) {
+		} else if (pinNumber == 3) {
 			pinResource = R.drawable.m3;
-		}
-		else if (pinNumber == 4) {
+		} else if (pinNumber == 4) {
 			pinResource = R.drawable.m4;
-		}
-		else if (pinNumber == 5) {
+		} else if (pinNumber == 5) {
 			pinResource = R.drawable.m5;
-		}
-		else if (pinNumber == 6) {
+		} else if (pinNumber == 6) {
 			pinResource = R.drawable.m6;
-		}
-		else if (pinNumber == 7) {
+		} else if (pinNumber == 7) {
 			pinResource = R.drawable.m7;
-		}
-		else if (pinNumber == 8) {
+		} else if (pinNumber == 8) {
 			pinResource = R.drawable.m8;
-		}
-		else if (pinNumber == 9) {
+		} else if (pinNumber == 9) {
 			pinResource = R.drawable.m9;
-		}
-		else if (pinNumber == 10) {
+		} else if (pinNumber == 10) {
 			pinResource = R.drawable.m10;
-		}
-		else if (pinNumber == 11) {
+		} else if (pinNumber == 11) {
 			pinResource = R.drawable.m11;
-		}
-		else if (pinNumber == 12) {
+		} else if (pinNumber == 12) {
 			pinResource = R.drawable.m12;
-		}
-		else if (pinNumber == 13) {
+		} else if (pinNumber == 13) {
 			pinResource = R.drawable.m13;
-		}
-		else if (pinNumber == 14) {
+		} else if (pinNumber == 14) {
 			pinResource = R.drawable.m14;
-		}
-		else if (pinNumber == 15) {
+		} else if (pinNumber == 15) {
 			pinResource = R.drawable.m15;
-		}
-		else if (pinNumber == 16) {
+		} else if (pinNumber == 16) {
 			pinResource = R.drawable.m16;
-		}
-		else if (pinNumber == 17) {
+		} else if (pinNumber == 17) {
 			pinResource = R.drawable.m17;
-		}
-		else if (pinNumber == 18) {
+		} else if (pinNumber == 18) {
 			pinResource = R.drawable.m18;
-		}
-		else if (pinNumber == 19) {
+		} else if (pinNumber == 19) {
 			pinResource = R.drawable.m19;
-		}
-		else if (pinNumber == 20) {
+		} else if (pinNumber == 20) {
 			pinResource = R.drawable.m20;
 		} else {
 			pinResource = R.drawable.m20;

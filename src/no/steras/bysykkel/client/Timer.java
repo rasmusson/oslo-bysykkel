@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
     rasmusson.stefan@gmail.com
-*/
+ */
 package no.steras.bysykkel.client;
 
 public class Timer {
@@ -22,8 +22,7 @@ public class Timer {
 	private long startTime = 0;
 	private long stopTime = 0;
 	private boolean running = false;
-	
-	
+
 	public void start() {
 		this.startTime = System.currentTimeMillis();
 		this.running = true;
@@ -44,4 +43,3 @@ public class Timer {
 		return elapsed;
 	}
 }
-

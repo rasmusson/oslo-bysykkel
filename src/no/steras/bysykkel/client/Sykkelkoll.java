@@ -17,7 +17,6 @@
  */
 package no.steras.bysykkel.client;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,14 +37,10 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -62,7 +57,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class Sykkelkoll extends FragmentActivity {
@@ -79,9 +73,9 @@ public class Sykkelkoll extends FragmentActivity {
 	private static final int MENU_ITEM_UPDATE = 1;
 	private static final int MENU_ITEM_ABOUT = 2;
 	private static final int MENU_ITEM_FEEDBACK = 3;
-	
+
 	private Tracker GATracker;
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -96,7 +90,8 @@ public class Sykkelkoll extends FragmentActivity {
 		switch (item.getItemId()) {
 		case MENU_ITEM_ABOUT:
 			AboutDialog about = new AboutDialog(this);
-			GATracker.sendEvent("Button actions", "aboutButton", "Open about dialog", null);
+			GATracker.sendEvent("Button actions", "aboutButton",
+					"Open about dialog", null);
 			about.setGoogleMapsAttribution(GooglePlayServicesUtil
 					.getOpenSourceSoftwareLicenseInfo(activity));
 			about.show();
@@ -129,17 +124,18 @@ public class Sykkelkoll extends FragmentActivity {
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
 	}
-	
+
+	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		activity = this;
 		Timer totalLoadingTimeTimer = new Timer();
 		totalLoadingTimeTimer.start();
-		
+
 		EasyTracker.getInstance().setContext(this);
 		GATracker = EasyTracker.getTracker();
-		
+
 		setContentView(R.layout.main);
 
 		setUpMapIfNeeded();
@@ -164,8 +160,10 @@ public class Sykkelkoll extends FragmentActivity {
 		addFindBikesButtonListener();
 		addFindLocksButtonListener();
 		addUpdateButtonListener();
-		
-		GATracker.sendTiming("Initial loading time", totalLoadingTimeTimer.getElapsedTime(), "totalLoadingTime", "Total loading time");
+
+		GATracker.sendTiming("Initial loading time",
+				totalLoadingTimeTimer.getElapsedTime(), "totalLoadingTime",
+				"Total loading time");
 
 	}
 
@@ -195,7 +193,7 @@ public class Sykkelkoll extends FragmentActivity {
 		});
 
 	}
-	
+
 	private void addFindLocksButtonListener() {
 		Button toggleButton = (Button) findViewById(R.id.findLockButton);
 		toggleButton.setOnClickListener(new OnClickListener() {
@@ -208,14 +206,15 @@ public class Sykkelkoll extends FragmentActivity {
 		});
 
 	}
-	
+
 	private void addUpdateButtonListener() {
 		Button toggleButton = (Button) findViewById(R.id.updateButton);
 		toggleButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				GATracker.sendEvent("Button actions", "updateButton", "Update stations", null);
+				GATracker.sendEvent("Button actions", "updateButton",
+						"Update stations", null);
 				try {
 					updateMarkers(markers);
 				} catch (JSONException e) {
@@ -244,7 +243,8 @@ public class Sykkelkoll extends FragmentActivity {
 		}
 
 		markers.setShowingBikes(true);
-		GATracker.sendTiming("Initial loading time", stopWatch.getElapsedTime(), "createMarkers", null);
+		GATracker.sendTiming("Initial loading time",
+				stopWatch.getElapsedTime(), "createMarkers", null);
 		return markers;
 	}
 
@@ -275,8 +275,10 @@ public class Sykkelkoll extends FragmentActivity {
 		}
 
 		markers.reloadActiveMarkers(mMap);
-		
-		GATracker.sendTiming("General loading time", stopWatch.getElapsedTime(), "updateStations", "Loading time for update stations");
+
+		GATracker.sendTiming("General loading time",
+				stopWatch.getElapsedTime(), "updateStations",
+				"Loading time for update stations");
 	}
 
 	private List<Station> loadStations() throws JSONException {
@@ -296,8 +298,9 @@ public class Sykkelkoll extends FragmentActivity {
 			c.moveToNext();
 		}
 		c.close();
-		
-		GATracker.sendTiming("Initial loading time", stopWatch.getElapsedTime(), "loadStations", null);
+
+		GATracker.sendTiming("Initial loading time",
+				stopWatch.getElapsedTime(), "loadStations", null);
 		return stations;
 
 	}
@@ -404,6 +407,7 @@ public class Sykkelkoll extends FragmentActivity {
 		c.close();
 		return stationsMap;
 	}
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
