@@ -1,0 +1,31 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="AppBaseTheme" parent="@style/Theme.AppCompat.Light">
+        <item name="windowActionBarOverlay">true</item>
+        <item name="android:windowActionBarOverlay" tools:targetApi="11">true</item>
+        <item name="android:actionBarStyle" tools:targetApi="11">@style/TransparentWhiteActionBar</item>
+        <item name="actionBarStyle">@style/TransparentWhiteActionBar</item>
+        <item name="actionOverflowButtonStyle">@style/OverFlow</item>
+        <item name="android:actionOverflowButtonStyle" tools:targetApi="11">@style/OverFlow</item>
+        <item name="android:selectableItemBackground" tools:targetApi="11">@drawable/selector_image_button_no_button_background</item>
+        <item name="selectableItemBackground">@drawable/selector_image_button_no_button_background</item>
+    </style>
+
+    <style name="TransparentWhiteActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
+        <item name="background">@drawable/background_gradient_actionbar_overlay</item>
+        <item name="android:background">@drawable/background_gradient_actionbar_overlay</item>
+        <item name="android:icon">@android:color/transparent</item>
+        <item name="icon">@android:color/transparent</item>
+        <item name="titleTextStyle">@style/ActionBarTitle</item>
+        <item name="android:titleTextStyle" tools:targetApi="11">@style/ActionBarTitle</item>
+    </style>
+
+    <style name="OverFlow" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:src">@drawable/image_menu_dots</item>
+    </style>
+
+    <style name="ActionBarTitle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/grey<item></item></item>
+    </style>
+
+</resources>

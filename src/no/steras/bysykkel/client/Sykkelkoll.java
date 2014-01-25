@@ -17,12 +17,10 @@
  */
 package no.steras.bysykkel.client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import no.steras.bysykkel.client.data.Backend;
 import no.steras.bysykkel.client.data.Station;
 import no.steras.bysykkel.client.data.StationsOpenHelper;
 import no.steras.bysykkel.client.dialog.AboutDialog;
@@ -37,21 +35,28 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -59,7 +64,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class Sykkelkoll extends FragmentActivity {
+public class Sykkelkoll extends ActionBarActivity {
 	GoogleMap mMap;
 	Activity activity;
 
@@ -68,44 +73,57 @@ public class Sykkelkoll extends FragmentActivity {
 	private StationsOpenHelper stationsHelper;
 
 	private Markers markers;
-	private Backend backend;
-
-	private static final int MENU_ITEM_UPDATE = 1;
-	private static final int MENU_ITEM_ABOUT = 2;
-	private static final int MENU_ITEM_FEEDBACK = 3;
 
 	private Tracker GATracker;
+	private RelativeLayout findBikeButton;
+	private RelativeLayout findLockButton;
+	private WebOnSperateThreadLoader webOnSperateThreadLoader;
 
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(0, MENU_ITEM_ABOUT, 1, "Om appen");
-		menu.add(0, MENU_ITEM_FEEDBACK, 1, "Gi tilbakemelding");
-
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_main, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		switch (item.getItemId()) {
-		case MENU_ITEM_ABOUT:
+		case R.id.menuAbout:
 			AboutDialog about = new AboutDialog(this);
-			GATracker.sendEvent("Button actions", "aboutButton",
-					"Open about dialog", null);
-			about.setGoogleMapsAttribution(GooglePlayServicesUtil
-					.getOpenSourceSoftwareLicenseInfo(activity));
+			GATracker.sendEvent("Button actions", "aboutButton", "Open about dialog", null);
+			about.setGoogleMapsAttribution(GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(activity));
 			about.show();
 			return true;
 
-		case MENU_ITEM_FEEDBACK:
+		case R.id.menuFeedback:
 			Intent Email = new Intent(Intent.ACTION_SEND);
 			Email.setType("text/email");
-			Email.putExtra(Intent.EXTRA_EMAIL,
-					new String[] { "rasmusson.stefan@gmail.com" });
-			Email.putExtra(Intent.EXTRA_SUBJECT,
-					"Tilbakemelding på Oslo Bysykkel app");
+			Email.putExtra(Intent.EXTRA_EMAIL, new String[] { "rasmusson.stefan@gmail.com" });
+			Email.putExtra(Intent.EXTRA_SUBJECT, "Tilbakemelding på Oslo Bysykkel app");
 			Email.putExtra(Intent.EXTRA_TEXT, "" + "");
 			startActivity(Intent.createChooser(Email, "Send tilbakemelding:"));
+			return true;
+			// case R.id.menuRefresh:
+			// GATracker.sendEvent("Button actions", "updateButton",
+			// "Update stations", null);
+			// try {
+			// updateMarkers(markers);
+			// } catch (JSONException e) {
+			// throw new RuntimeException(e);
+			// }
+			// return true;
+		case R.id.menuPosition:
+
+			Location findme = mMap.getMyLocation();
+			double latitude = findme.getLatitude();
+			double longitude = findme.getLongitude();
+			CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(latitude, longitude));
+			CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
+
+			mMap.moveCamera(center);
+			mMap.animateCamera(zoom);
 			return true;
 
 		default:
@@ -125,10 +143,8 @@ public class Sykkelkoll extends FragmentActivity {
 		EasyTracker.getInstance().activityStop(this);
 	}
 
-	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		activity = this;
 		Timer totalLoadingTimeTimer = new Timer();
 		totalLoadingTimeTimer.start();
@@ -144,33 +160,42 @@ public class Sykkelkoll extends FragmentActivity {
 		initDb();
 		graphicsProvider = new DefaultGraphicsProvider(activity);
 
-		backend = new Backend();
+		initWebLoader();
 
 		toastIfNoConnection();
 
-		List<Station> stations = null;
-		try {
-			stations = loadStations();
-		} catch (JSONException e) {
-			throw new RuntimeException(e);
-		}
-
-		markers = createMarkers(stations);
-
 		addFindBikesButtonListener();
 		addFindLocksButtonListener();
-		addUpdateButtonListener();
 
-		GATracker.sendTiming("Initial loading time",
-				totalLoadingTimeTimer.getElapsedTime(), "totalLoadingTime",
-				"Total loading time");
+		GATracker.sendTiming("Initial loading time", totalLoadingTimeTimer.getElapsedTime(), "totalLoadingTime", "Total loading time");
 
+	}
+
+	private void initWebLoader() {
+		webOnSperateThreadLoader = new WebOnSperateThreadLoader(Sykkelkoll.this);
+		getSupportLoaderManager().initLoader(0, null, new LoaderCallbacks<List<Station>>() {
+
+			@Override
+			public android.support.v4.content.Loader<List<Station>> onCreateLoader(int arg0, Bundle arg1) {
+				return webOnSperateThreadLoader;
+			}
+
+			@Override
+			public void onLoadFinished(android.support.v4.content.Loader<List<Station>> arg0, List<Station> stations) {
+
+				createAndShowMarkers(stations);
+			}
+
+			@Override
+			public void onLoaderReset(android.support.v4.content.Loader<List<Station>> arg0) {
+
+			}
+		});
 	}
 
 	private void toastIfNoConnection() {
 		if (!haveNetworkConnection()) {
-			Toast.makeText(this, "Ingen Internett-tilkobling",
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Ingen Internett-tilkobling", Toast.LENGTH_LONG).show();
 		}
 
 	}
@@ -182,11 +207,13 @@ public class Sykkelkoll extends FragmentActivity {
 	}
 
 	private void addFindBikesButtonListener() {
-		Button toggleButton = (Button) findViewById(R.id.findBikeButton);
-		toggleButton.setOnClickListener(new OnClickListener() {
+		findBikeButton = (RelativeLayout) findViewById(R.id.findBikeButton);
+		findBikeButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				findBikeButton.setBackgroundColor(getResources().getColor(R.color.button_pressed));
+				findLockButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.selector_image_button_no_button_background));
 				markers.showFreeBikeMarkers(mMap);
 			}
 
@@ -195,11 +222,13 @@ public class Sykkelkoll extends FragmentActivity {
 	}
 
 	private void addFindLocksButtonListener() {
-		Button toggleButton = (Button) findViewById(R.id.findLockButton);
-		toggleButton.setOnClickListener(new OnClickListener() {
+		findLockButton = (RelativeLayout) findViewById(R.id.findLockButton);
+		findLockButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				findLockButton.setBackgroundColor(getResources().getColor(R.color.button_pressed));
+				findBikeButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.selector_image_button_no_button_background));
 				markers.showFreeLockMarkers(mMap);
 			}
 
@@ -207,53 +236,36 @@ public class Sykkelkoll extends FragmentActivity {
 
 	}
 
-	private void addUpdateButtonListener() {
-		Button toggleButton = (Button) findViewById(R.id.updateButton);
-		toggleButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				GATracker.sendEvent("Button actions", "updateButton",
-						"Update stations", null);
-				try {
-					updateMarkers(markers);
-				} catch (JSONException e) {
-					throw new RuntimeException(e);
-				}
-			}
-
-		});
-
-	}
-
-	private Markers createMarkers(List<Station> stations) {
+	private void createAndShowMarkers(List<Station> stations) {
+		Log.d(getClass().getName(), "createMarkers for station count: " + (stations != null ? stations.size() : "0"));
 		stopWatch.start();
-		Markers markers = new Markers();
+		if (markers == null)
+			markers = new Markers();
+		else
+			markers.clearOldMarkers();
+
+		mMap.clear();
 
 		for (Station station : stations) {
 
-			MarkerOptions bikesMarker = createMarker(station,
-					station.getBikesReady());
+			MarkerOptions bikesMarker = createMarker(station, station.getBikesReady());
 			markers.getFreeBikesMarkers().add(bikesMarker);
-			mMap.addMarker(bikesMarker);
+			if (markers.isShowingBikes())
+				mMap.addMarker(bikesMarker);
 
-			MarkerOptions locksMarker = createMarker(station,
-					station.getLocksReady());
+			MarkerOptions locksMarker = createMarker(station, station.getLocksReady());
 			markers.getFreeLocksMarkers().add(locksMarker);
+			if (!markers.isShowingBikes())
+				mMap.addMarker(locksMarker);
 		}
 
-		markers.setShowingBikes(true);
-		GATracker.sendTiming("Initial loading time",
-				stopWatch.getElapsedTime(), "createMarkers", null);
-		return markers;
+		GATracker.sendTiming("Initial loading time", stopWatch.getElapsedTime(), "createMarkers", null);
 	}
 
 	private MarkerOptions createMarker(Station station, int pinNummer) {
-		BitmapDescriptor icon = BitmapDescriptorFactory
-				.fromResource(graphicsProvider.getPinResource(pinNummer));
-		MarkerOptions marker = new MarkerOptions().position(
-				station.getLocation()).icon(icon);
 
+		BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(graphicsProvider.getPinResource(pinNummer));
+		MarkerOptions marker = new MarkerOptions().position(station.getLocation()).icon(icon);
 		return marker;
 	}
 
@@ -263,62 +275,18 @@ public class Sykkelkoll extends FragmentActivity {
 		markers.getFreeBikesMarkers().clear();
 		markers.getFreeLocksMarkers().clear();
 
-		List<Station> stations = loadStations();
+		List<Station> stations = null;// loadStations();
 		for (Station station : stations) {
-			MarkerOptions bikesMarker = createMarker(station,
-					station.getBikesReady());
+			MarkerOptions bikesMarker = createMarker(station, station.getBikesReady());
 			markers.getFreeBikesMarkers().add(bikesMarker);
 
-			MarkerOptions locksMarker = createMarker(station,
-					station.getLocksReady());
+			MarkerOptions locksMarker = createMarker(station, station.getLocksReady());
 			markers.getFreeLocksMarkers().add(locksMarker);
 		}
 
 		markers.reloadActiveMarkers(mMap);
 
-		GATracker.sendTiming("General loading time",
-				stopWatch.getElapsedTime(), "updateStations",
-				"Loading time for update stations");
-	}
-
-	private List<Station> loadStations() throws JSONException {
-		stopWatch.start();
-		List<Station> stations = new ArrayList<Station>();
-
-		backend.loadData();
-
-		Cursor c = stationsHelper.getStations();
-		c.moveToFirst();
-		while (c.isAfterLast() == false) {
-			Station station = createStationFromDBData(c);
-
-			backend.populateWithBackEndData(station);
-
-			stations.add(station);
-			c.moveToNext();
-		}
-		c.close();
-
-		GATracker.sendTiming("Initial loading time",
-				stopWatch.getElapsedTime(), "loadStations", null);
-		return stations;
-
-	}
-
-	private Station createStationFromDBData(Cursor c) {
-		int latitudeColumnIndex = c.getColumnIndex("latitude");
-		int longitudeColumnIndex = c.getColumnIndex("longitude");
-		int descriptionColumnIndex = c.getColumnIndex("description");
-		int idColumnIndex = c.getColumnIndex("_id");
-
-		Station station = new Station();
-		station.setLocation(new LatLng(c.getDouble(latitudeColumnIndex), c
-				.getDouble(longitudeColumnIndex)));
-
-		station.setDescription(c.getString(descriptionColumnIndex));
-		station.setId(c.getInt(idColumnIndex));
-
-		return station;
+		GATracker.sendTiming("General loading time", stopWatch.getElapsedTime(), "updateStations", "Loading time for update stations");
 	}
 
 	private void initDb() {
@@ -329,18 +297,16 @@ public class Sykkelkoll extends FragmentActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		checkGoogleServicesStatus();
+		webOnSperateThreadLoader.forceLoad();
+
 	}
 
 	private void checkGoogleServicesStatus() {
-		int resultCode = GooglePlayServicesUtil
-				.isGooglePlayServicesAvailable(activity.getApplicationContext());
+		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity.getApplicationContext());
 		if (resultCode == ConnectionResult.SUCCESS) {
-		} else if (resultCode == ConnectionResult.SERVICE_MISSING
-				|| resultCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED
+		} else if (resultCode == ConnectionResult.SERVICE_MISSING || resultCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED
 				|| resultCode == ConnectionResult.SERVICE_DISABLED) {
-			Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode,
-					activity, 1);
+			Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, activity, 1);
 			dialog.show();
 		}
 
@@ -350,8 +316,7 @@ public class Sykkelkoll extends FragmentActivity {
 		// Do a null check to confirm that we have not already instantiated the
 		// map.
 		if (mMap == null) {
-			mMap = ((SupportMapFragment) getSupportFragmentManager()
-					.findFragmentById(R.id.map)).getMap();
+			mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
 			// Check if we were successful in obtaining the map.
 			if (mMap != null) {
 				// The Map is verified. It is now safe to manipulate the map.
@@ -380,7 +345,8 @@ public class Sykkelkoll extends FragmentActivity {
 	private void initMyLocation() {
 		stopWatch.start();
 		mMap.setMyLocationEnabled(true);
-		mMap.getUiSettings().setMyLocationButtonEnabled(true);
+		mMap.getUiSettings().setMyLocationButtonEnabled(false);
+		mMap.getUiSettings().setZoomControlsEnabled(false);
 
 	}
 
@@ -396,8 +362,7 @@ public class Sykkelkoll extends FragmentActivity {
 		while (c.isAfterLast() == false) {
 
 			Station station = new Station();
-			station.setLocation(new LatLng(c.getDouble(latitudeColumnIndex), c
-					.getDouble(longitudeColumnIndex)));
+			station.setLocation(new LatLng(c.getDouble(latitudeColumnIndex), c.getDouble(longitudeColumnIndex)));
 
 			station.setDescription(c.getString(descriptionColumnIndex));
 			station.setId(c.getInt(idColumnIndex));
