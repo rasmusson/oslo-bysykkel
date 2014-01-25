@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="buttonbarBackground">#d4d4d4</color>
+
+    <color name="grey">#595959</color>
+    <color name="button_pressed">#88D0D0D0</color>
+
 </resources>

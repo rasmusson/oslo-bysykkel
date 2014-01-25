@@ -10,6 +10,10 @@ public class Markers {
 	private List<MarkerOptions> freeBikesMarkerList = new ArrayList<MarkerOptions>();
 	private List<MarkerOptions> freeLocksMarkerList = new ArrayList<MarkerOptions>();
 
+	public Markers() {
+		this.showingBikes = true;
+	}
+
 	private Boolean showingBikes;
 
 	public List<MarkerOptions> getFreeBikesMarkers() {
@@ -57,7 +61,8 @@ public class Markers {
 		return showingBikes;
 	}
 
-	public void setShowingBikes(Boolean showingBikes) {
-		this.showingBikes = showingBikes;
+	public void clearOldMarkers() {
+		freeBikesMarkerList = new ArrayList<MarkerOptions>();
+		freeLocksMarkerList = new ArrayList<MarkerOptions>();
 	}
 }

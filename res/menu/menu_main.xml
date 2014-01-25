@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto" >
+
+    <item
+        android:id="@+id/menuPosition"
+        android:icon="@drawable/image_action_position"
+        android:title="@string/poisition"
+        custom:showAsAction="always"/>
+    <!--
+         <item
+        android:id="@+id/menuRefresh"
+        android:icon="@drawable/image_action_refresh"
+        android:title="@string/refresh"
+        custom:showAsAction="never"/>
+    -->
+    <item
+        android:id="@+id/menuFeedback"
+        android:title="@string/feedback"
+        custom:showAsAction="never"/>
+    <item
+        android:id="@+id/menuAbout"
+        android:title="@string/about"
+        custom:showAsAction="never"/>
+
+</menu>
