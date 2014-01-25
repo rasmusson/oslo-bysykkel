@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="app_name">Oslo bysykkel</string>
+    <string name="app_name_upper_case">OSLO BYSYKKEL</string>
+    <string name="app_name">Oslo Bysykkel</string>
+    <string name="poisition">Min posisjon</string>
+    <string name="refresh">Oppdater</string>
+    <string name="about">Om appen</string>
+    <string name="feedback">Gi tilbakemelding</string>
+    <string name="show_bikes">Vis sykler</string>
+    <string name="show_locks">Vis låser</string>
 
 </resources>
