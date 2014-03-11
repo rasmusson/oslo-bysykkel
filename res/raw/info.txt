@@ -1,13 +1,13 @@
 <h3>Oslo Bysykkel</h3>
-Version 1.0.3<br>
+Version 1.1.0<br>
 Copyright 2013<br>
 
 <br>
 <br>
 <h3>Skrevet av</h3>
 Stefan Rasmusson<br>
-Javautvikler<br>
 http://no.linkedin.com/in/steras/<br>
+https://github.com/rasmusson/oslo-bysykkel<br>
 <br>
 <br>
 <br>
