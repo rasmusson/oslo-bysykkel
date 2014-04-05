@@ -15,6 +15,7 @@
         map:cameraTargetLat="59.920786"
         map:cameraTargetLng="10.741711"
         map:cameraZoom="13"
+        map:uiCompass="true"
         tools:ignore="MissingPrefix" />
 
     <RelativeLayout
