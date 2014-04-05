@@ -24,6 +24,7 @@ import java.util.Map;
 import no.steras.bysykkel.client.data.Station;
 import no.steras.bysykkel.client.data.StationsOpenHelper;
 import no.steras.bysykkel.client.dialog.AboutDialog;
+import no.steras.bysykkel.client.dialog.RatingHelper;
 import no.steras.bysykkel.client.map.DefaultGraphicsProvider;
 import no.steras.bysykkel.client.map.GraphicsProvider;
 import no.steras.bysykkel.client.map.Markers;
@@ -117,13 +118,19 @@ public class Sykkelkoll extends ActionBarActivity {
 		case R.id.menuPosition:
 
 			Location findme = mMap.getMyLocation();
-			double latitude = findme.getLatitude();
-			double longitude = findme.getLongitude();
-			CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(latitude, longitude));
-			CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
+			if (findme != null) {
+                double latitude = findme.getLatitude();
+                double longitude = findme.getLongitude();
+                CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(latitude, longitude));
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
 
-			mMap.moveCamera(center);
-			mMap.animateCamera(zoom);
+                mMap.moveCamera(center);
+                mMap.animateCamera(zoom);
+            } else {
+                Toast.makeText(this, "Kan ikke finne posisjon", Toast.LENGTH_LONG).show();
+            }
+
+
 			return true;
 
 		default:

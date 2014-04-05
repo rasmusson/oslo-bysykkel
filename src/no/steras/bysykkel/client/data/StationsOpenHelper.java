@@ -7,7 +7,7 @@ import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 public class StationsOpenHelper extends SQLiteAssetHelper {
 
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 5;
 	private static final String STATION_TABLE_NAME = "station";
 
 	private static final String DB_PATH = "/data/data/no.steras.bysykkel.client/databases/";
