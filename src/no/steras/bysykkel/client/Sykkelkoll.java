@@ -24,7 +24,6 @@ import java.util.Map;
 import no.steras.bysykkel.client.data.Station;
 import no.steras.bysykkel.client.data.StationsOpenHelper;
 import no.steras.bysykkel.client.dialog.AboutDialog;
-import no.steras.bysykkel.client.dialog.RatingHelper;
 import no.steras.bysykkel.client.map.DefaultGraphicsProvider;
 import no.steras.bysykkel.client.map.GraphicsProvider;
 import no.steras.bysykkel.client.map.Markers;
