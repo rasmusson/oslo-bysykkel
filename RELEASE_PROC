@@ -4,3 +4,4 @@ Things to do before release
 2. Change backend URL to http://bysykkel-prod.appspot.com/json
 3. Change version number from beta
 4. Change version number in about box
+5. Increase db number in sqllitehelper
