@@ -220,7 +220,9 @@ public class Sykkelkoll extends ActionBarActivity {
 			public void onClick(View v) {
 				findBikeButton.setBackgroundColor(getResources().getColor(R.color.button_pressed));
 				findLockButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.selector_image_button_no_button_background));
-				markers.showFreeBikeMarkers(mMap);
+                if (markers != null && mMap != null) {
+                    markers.showFreeBikeMarkers(mMap);
+                }
 			}
 
 		});
@@ -235,7 +237,9 @@ public class Sykkelkoll extends ActionBarActivity {
 			public void onClick(View v) {
 				findLockButton.setBackgroundColor(getResources().getColor(R.color.button_pressed));
 				findBikeButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.selector_image_button_no_button_background));
-				markers.showFreeLockMarkers(mMap);
+                if (markers != null && mMap != null) {
+                    markers.showFreeLockMarkers(mMap);
+                }
 			}
 
 		});
