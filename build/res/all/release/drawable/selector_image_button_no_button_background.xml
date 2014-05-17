@@ -1,0 +1,4 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/button_pressed" android:state_pressed="true"/>
+    <item android:drawable="@android:color/transparent"/>
+</selector><!-- From: file:/Users/Privat/git/bysykkel/bysykkel-client/src/main/res/drawable/selector_image_button_no_button_background.xml -->

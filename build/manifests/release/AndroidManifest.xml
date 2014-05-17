@@ -1,0 +1,40 @@
+<!-- From: file:/Users/Privat/git/bysykkel/bysykkel-client/src/main/AndroidManifest.xml --><manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="20" android:versionName="1.1.1-4-g1cf0611" package="no.steras.bysykkel.client">
+
+    <permission android:name="no.steras.bysykkel.client.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>
+
+    <uses-permission android:name="com.example.mapdemo.permission.MAPS_RECEIVE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+
+    <application android:icon="@drawable/ic_launcher_bysykkel" android:label="@string/app_name" android:theme="@style/AppBaseTheme">
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
+
+        <activity android:configChanges="orientation|keyboardHidden|screenSize" android:label="@string/app_name_upper_case" android:name="no.steras.bysykkel.client.Sykkelkoll">
+            <intent-filter android:label="@string/app_name">
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- Debug -->
+            <!--meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyD-4f6HL5o0nTDiCPSW64wKR2paS02ponI"/-->
+
+        <!-- Prod -->
+
+    <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyBYvuNpTu-KTS6fP45m8MF_LI6Awl2Ulrs"/>
+
+
+    </application>
+
+    <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
+
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19"/>
+
+</manifest>
