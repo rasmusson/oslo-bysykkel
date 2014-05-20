@@ -1,7 +1,0 @@
-<!-- From: file:/Users/katafuchi/Dropbox/Code/android/Android-Rate/library/src/main/AndroidManifest.xml --><manifest xmlns:android="http://schemas.android.com/apk/res/android" package="hotchemi.android.rate">
-
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19" xmlns:tools="http://schemas.android.com/tools" tools:ignore="GradleOverrides"/>
-
-    <application/>
-
-</manifest>

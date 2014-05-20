@@ -165,9 +165,7 @@ public class Sykkelkoll extends ActionBarActivity {
 		setUpMapIfNeeded();
 		initMyLocation();
 
-        AppRate.setInstallDays(0) // default 10, 0 means install day.
-                .setLaunchTimes(0) // default 10
-                .monitor(this);
+        AppRate.monitor(this);
         // Show a dialog if meets conditions
         AppRate.showRateDialogIfMeetsConditions(this);
 

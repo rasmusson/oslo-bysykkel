@@ -10,4 +10,14 @@
     <string name="show_bikes">Vis sykler</string>
     <string name="show_locks">Vis låser</string>
 
+    <string name="rate_dialog_title">Rate Oslo Bysykkel App</string>
+    <string name="rate_dialog_message">Du har nå brukt Oslo Bysykkel Appen en stund. Hva syns du så langt</string>
+    <string name="rate_dialog_rate_button">Veldigt bra, evaluér!</string>
+    <string name="rate_dialog_feedback_button">Trenger forbedringer</string>
+    <string name="rate_dialog_stop_showing_button">Ingen kommentar</string>
+    <string name="rate_dialog_feedback_email">rasmusson.stefan@gmail.com</string>
+    <string name="rate_dialog_feedback_subject">Tilbakemelding Oslo Bysykkel App</string>
+    <string name="rate_dialog_feedback_body">Tilbakemelding og mulige forbedringer:</string>
+    <string name="rate_dialog_feedback_dialog_title">Send tilbakemelding</string>
+
 </resources>
