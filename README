@@ -1,1 +1,17 @@
 An android application for viewing the status of the stations in the Oslo bysykkel system.
+
+Uses gradle.properties for signing of apk.
+
+To use gradle you need to create a the gradle properties with the following content
+
+KEYSTORE_PATH=<Path to the keystore, relative to the root of the project>
+KEYSTORE_PASSWORD=<Password of the keystore>
+KEY_ALIAS=<The name of the key to use>
+KEY_PASSWORD=<password for the key>
+
+
+To build the apk
+./gradlew build
+
+To deploy to device
+./gradlew installDebug
