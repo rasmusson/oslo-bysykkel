@@ -3,3 +3,8 @@
 .DS_Store
 *.iml
 keystore.jks
+.gradle/
+build/
+gradle/
+gradle.properties
+local.properties
