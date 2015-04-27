@@ -17,6 +17,8 @@
  */
 package no.steras.bysykkel.client;
 
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +155,7 @@ public class Sykkelkoll extends ActionBarActivity {
 
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Fabric.with(this, new Crashlytics());
 		activity = this;
 		Timer totalLoadingTimeTimer = new Timer();
 		totalLoadingTimeTimer.start();

@@ -6,5 +6,6 @@ keystore.jks
 .gradle/
 build/
 gradle/
+.idea/
 gradle.properties
 local.properties

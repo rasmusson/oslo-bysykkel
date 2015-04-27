@@ -1,12 +1,20 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:1.1.0'
+        classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 apply plugin: 'android'
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
+
 
 dependencies {
     repositories {
@@ -18,19 +26,22 @@ dependencies {
     compile 'no.steras.sneaky-rate:sneaky-rate:0.0.1@aar'
     compile 'com.android.support:appcompat-v7:18.0.+'
     compile 'com.google.android.gms:play-services:3.2.65'
+    compile('com.crashlytics.sdk.android:crashlytics:2.2.3@aar') {
+        transitive = true;
+    }
 }
 
 android {
     defaultConfig {
-	versionCode = 32
-        versionName = '1.1.8'
+	versionCode = 33
+        versionName = '1.1.9'
 
         minSdkVersion 8
         targetSdkVersion 19
     }
    
     compileSdkVersion 'Google Inc.:Google APIs:19'
-    buildToolsVersion "19.0.1"
+    buildToolsVersion "19.1.0"
 
     signingConfigs {
         release {
